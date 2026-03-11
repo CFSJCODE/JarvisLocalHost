@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>J.A.R.V.I.S — Stark Industries</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Share+Tech+Mono&family=Rajdhani:wght@300;400;500;600&display=swap');
+
+:root {
+  --cyan:      #00e5ff;
+  --blue:      #0077ff;
+  --gold:      #ffc107;
+  --red:       #ff3d57;
+  --green:     #00e676;
+  --dark:      #010d1a;
+  --mid:       #031624;
+  --panel:     rgba(0,18,40,0.75);
+  --border:    rgba(0,229,255,0.15);
+  --glow:      0 0 20px rgba(0,229,255,0.35);
+  --glow-lg:   0 0 40px rgba(0,229,255,0.6);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--dark);
+  font-family: 'Rajdhani', sans-serif;
+  color: var(--cyan);
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Grid background */
+body::before {
+  content:''; position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(0,229,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0,229,255,.03) 1px, transparent 1px);
+  background-size: 44px 44px;
+  pointer-events:none; z-index:0;
+}
+
+/* Scanlines */
+body::after {
+  content:''; position:fixed; inset:0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.12) 2px, rgba(0,0,0,.12) 4px);
+  pointer-events:none; z-index:99;
+  animation: scan 10s linear infinite;
+}
+@keyframes scan { to { background-position: 0 100px; } }
+
+/* ──────────── LAYOUT ──────────── */
+.hud { position:fixed; inset:0; display:flex; flex-direction:column; z-index:1; }
+
+/* TOP BAR */
+.topbar {
+  display:flex; justify-content:space-between; align-items:center;
+  padding: 10px 28px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(1,10,24,.92);
+  position: relative; flex-shrink:0;
+}
+.topbar::after {
+  content:''; position:absolute; bottom:-1px; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent, var(--cyan) 30%, var(--cyan) 70%, transparent);
+  animation: glow-h 3s ease-in-out infinite;
+}
+@keyframes glow-h { 0%,100%{opacity:.3} 50%{opacity:1} }
+
+.logo {
+  font-family:'Orbitron', sans-serif; font-size:20px; font-weight:900;
+  letter-spacing:7px; color:var(--cyan);
+  text-shadow: 0 0 20px rgba(0,229,255,.7), 0 0 40px rgba(0,229,255,.4);
+  animation: logo-pulse 2.5s ease-in-out infinite;
+}
+@keyframes logo-pulse {
+  0%,100%{ text-shadow: 0 0 15px rgba(0,229,255,.5); }
+  50%    { text-shadow: 0 0 30px rgba(0,229,255,1), 0 0 60px rgba(0,229,255,.5); }
+}
+
+.topbar-center { display:flex; gap:24px; align-items:center; }
+.status-pill {
+  font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:2px;
+  padding:4px 12px; border:1px solid; border-radius:2px;
+  display:flex; align-items:center; gap:7px;
+}
+.status-pill.online { border-color:var(--green); color:var(--green); }
+.status-pill.training { border-color:var(--gold); color:var(--gold); }
+.status-pill.offline { border-color:var(--red); color:var(--red); }
+.blink { width:6px;height:6px;border-radius:50%;background:currentColor;
+         box-shadow:0 0 6px currentColor; animation:blink 1.2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.1} }
+
+.clock { font-family:'Orbitron',sans-serif;font-size:13px;letter-spacing:3px;opacity:.8; }
+
+/* MAIN */
+.main { flex:1; display:flex; gap:14px; padding:14px 18px; overflow:hidden; min-height:0; }
+
+/* PANELS */
+.panel {
+  border:1px solid var(--border); background:var(--panel);
+  padding:14px; position:relative; flex-shrink:0;
+  clip-path: polygon(0 0, calc(100%-10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100%-10px));
+}
+.panel::before {
+  content:''; position:absolute; top:0; left:0; width:30px; height:1px;
+  background:var(--cyan); box-shadow:0 0 5px var(--cyan);
+}
+.plabel {
+  font-family:'Orbitron',sans-serif; font-size:8px; letter-spacing:3px;
+  color:rgba(0,229,255,.45); margin-bottom:10px; text-transform:uppercase;
+}
+
+/* LEFT PANEL */
+.left { width:210px; display:flex; flex-direction:column; gap:12px; overflow-y:auto; overflow-x:hidden; }
+.left::-webkit-scrollbar { width:2px; }
+.left::-webkit-scrollbar-thumb { background:rgba(0,229,255,.2); }
+
+/* CENTER */
+.center { flex:1; display:flex; flex-direction:column; gap:12px; min-width:0; }
+
+/* RIGHT PANEL */
+.right { width:230px; display:flex; flex-direction:column; gap:12px; overflow-y:auto; overflow-x:hidden; }
+.right::-webkit-scrollbar { width:2px; }
+.right::-webkit-scrollbar-thumb { background:rgba(0,229,255,.2); }
+
+/* ──────────── RADAR ──────────── */
+.radar { width:128px; height:128px; margin:0 auto; }
+.radar svg { width:100%; height:100%; }
+.r-ring { fill:none; stroke:rgba(0,229,255,.12); stroke-width:1; }
+.r-sweep { transform-origin:64px 64px; animation:spin 3.5s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.r-dot { fill:var(--cyan); filter:drop-shadow(0 0 4px var(--cyan)); animation:rdot 2s ease-in-out infinite; }
+@keyframes rdot { 0%,100%{r:2.5} 50%{r:4.5} }
+
+/* ──────────── METRICS ──────────── */
+.m-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; }
+.m-label { font-family:'Orbitron',sans-serif; font-size:9px; color:rgba(0,229,255,.45); letter-spacing:1px; }
+.m-val { font-family:'Orbitron',sans-serif; font-size:11px; color:var(--cyan); text-shadow:0 0 6px var(--cyan); }
+.m-bar { height:2.5px; background:rgba(0,229,255,.08); border-radius:2px; margin-bottom:8px; overflow:hidden; }
+.m-fill { height:100%; background:linear-gradient(90deg,var(--blue),var(--cyan)); box-shadow:0 0 5px var(--cyan); border-radius:2px; transition:width .8s ease; }
+.m-fill.warn { background:linear-gradient(90deg,#f57f17,var(--gold)); }
+.m-fill.crit { background:linear-gradient(90deg,#b71c1c,var(--red)); }
+
+/* ──────────── ARC REACTOR ──────────── */
+.arc-zone { display:flex; justify-content:center; align-items:center; padding:12px 0 6px; position:relative; flex-shrink:0; }
+.arc { width:100px; height:100px; }
+.arc svg { width:100%; height:100%; animation:arc-pulse 2s ease-in-out infinite; }
+@keyframes arc-pulse {
+  0%,100%{ filter:drop-shadow(0 0 6px rgba(0,229,255,.5)); }
+  50%    { filter:drop-shadow(0 0 18px rgba(0,229,255,1)) drop-shadow(0 0 36px rgba(0,229,255,.5)); }
+}
+.arc-ring1 { fill:none; stroke:rgba(0,229,255,.35); stroke-width:2; stroke-dasharray:8 5; animation:cspin 6s linear infinite; transform-origin:50px 50px; }
+.arc-ring2 { fill:none; stroke:rgba(0,119,255,.55); stroke-width:3; stroke-dasharray:5 4; animation:spin 3.5s linear infinite; transform-origin:50px 50px; }
+.arc-ring3 { fill:none; stroke:var(--cyan); stroke-width:2; animation:cspin 2.5s linear infinite; transform-origin:50px 50px; }
+.arc-core  { fill:var(--cyan); filter:drop-shadow(0 0 8px var(--cyan)); animation:core-p 1.8s ease-in-out infinite; }
+@keyframes cspin { to { transform:rotate(-360deg); } }
+@keyframes core-p { 0%,100%{opacity:.7} 50%{opacity:1} }
+.arc-label {
+  position:absolute; bottom:2px; font-family:'Orbitron',sans-serif;
+  font-size:8px; letter-spacing:3px; color:rgba(0,229,255,.35);
+}
+
+/* ──────────── CHAT ──────────── */
+.chat-wrap {
+  flex:1; display:flex; flex-direction:column;
+  border:1px solid var(--border); background:rgba(0,12,28,.65); min-height:0;
+  clip-path:polygon(0 0, calc(100%-14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100%-14px));
+}
+.chat-hdr {
+  padding:8px 14px; border-bottom:1px solid var(--border);
+  font-family:'Orbitron',sans-serif; font-size:8px; letter-spacing:2.5px;
+  color:rgba(0,229,255,.38); display:flex; justify-content:space-between; flex-shrink:0;
+}
+.messages {
+  flex:1; overflow-y:auto; padding:14px; display:flex;
+  flex-direction:column; gap:12px; scroll-behavior:smooth; min-height:0;
+}
+.messages::-webkit-scrollbar { width:2px; }
+.messages::-webkit-scrollbar-thumb { background:rgba(0,229,255,.2); }
+
+.msg { display:flex; gap:9px; animation:msgIn .35s ease forwards; opacity:0; transform:translateY(8px); }
+@keyframes msgIn { to { opacity:1; transform:translateY(0); } }
+.msg.user { flex-direction:row-reverse; }
+
+.avatar {
+  width:30px; height:30px; border-radius:50%; border:1px solid; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700;
+}
+.avatar.j { border-color:var(--cyan); color:var(--cyan); background:rgba(0,229,255,.06); box-shadow:0 0 8px rgba(0,229,255,.25); }
+.avatar.u { border-color:var(--gold); color:var(--gold); background:rgba(255,193,7,.06); }
+
+.bubble { max-width:72%; padding:9px 13px; font-size:13.5px; line-height:1.6; letter-spacing:.3px; }
+.msg.j .bubble {
+  background:rgba(0,229,255,.05); border:1px solid rgba(0,229,255,.18);
+  border-left:3px solid var(--cyan); color:rgba(210,245,255,.92);
+  clip-path:polygon(0 0, calc(100%-7px) 0, 100% 7px, 100% 100%, 0 100%);
+}
+.msg.user .bubble {
+  background:rgba(255,193,7,.05); border:1px solid rgba(255,193,7,.18);
+  border-right:3px solid var(--gold); color:rgba(255,235,160,.92);
+  clip-path:polygon(7px 0, 100% 0, 100% 100%, 0 100%, 0 7px);
+}
+.bname { font-family:'Orbitron',sans-serif; font-size:7.5px; letter-spacing:2px; opacity:.4; margin-bottom:3px; }
+
+/* Typing */
+.typing { display:none; gap:4px; align-items:center; padding:10px 14px 10px 46px; flex-shrink:0; }
+.typing.on { display:flex; }
+.tdot { width:5px; height:5px; border-radius:50%; background:var(--cyan); box-shadow:0 0 5px var(--cyan); animation:td 1.2s ease-in-out infinite; }
+.tdot:nth-child(2){ animation-delay:.18s; }
+.tdot:nth-child(3){ animation-delay:.36s; }
+@keyframes td { 0%,100%{opacity:.25;transform:translateY(0)} 50%{opacity:1;transform:translateY(-4px)} }
+
+/* Sources badge */
+.sources { margin-top:5px; display:flex; gap:4px; flex-wrap:wrap; }
+.src-badge {
+  font-family:'Orbitron',sans-serif; font-size:7px; letter-spacing:1px;
+  padding:2px 7px; border:1px solid rgba(0,229,255,.25);
+  color:rgba(0,229,255,.55); background:rgba(0,229,255,.04);
+}
+
+/* Input */
+.input-zone {
+  padding:10px 14px; border-top:1px solid var(--border);
+  display:flex; gap:9px; align-items:center; background:rgba(1,10,24,.85); flex-shrink:0;
+}
+.input-pre { font-family:'Orbitron',sans-serif; font-size:9px; color:var(--gold); letter-spacing:2px; opacity:.75; white-space:nowrap; }
+.ifield {
+  flex:1; background:transparent; border:none; outline:none;
+  color:rgba(255,235,160,.95); font-family:'Share Tech Mono', monospace;
+  font-size:14px; letter-spacing:.8px; caret-color:var(--gold);
+}
+.ifield::placeholder { color:rgba(0,229,255,.2); font-size:11px; letter-spacing:1px; font-style:italic; }
+.send-btn {
+  background:rgba(0,229,255,.08); border:1px solid rgba(0,229,255,.3);
+  color:var(--cyan); padding:6px 15px; cursor:pointer;
+  font-family:'Orbitron',sans-serif; font-size:8px; letter-spacing:2px;
+  transition:all .2s;
+  clip-path:polygon(6px 0, 100% 0, 100% calc(100%-6px), calc(100%-6px) 100%, 0 100%, 0 6px);
+}
+.send-btn:hover { background:rgba(0,229,255,.18); box-shadow:var(--glow); }
+
+/* ──────────── WAVE ──────────── */
+.wave { display:flex; align-items:center; justify-content:center; gap:3px; height:36px; }
+.wbar {
+  width:3px; border-radius:2px; background:var(--cyan); box-shadow:0 0 4px var(--cyan);
+  animation:wv 1.3s ease-in-out infinite;
+}
+.wbar:nth-child(1){height:7px;animation-delay:.0s}  .wbar:nth-child(2){height:14px;animation-delay:.1s}
+.wbar:nth-child(3){height:22px;animation-delay:.2s} .wbar:nth-child(4){height:32px;animation-delay:.3s}
+.wbar:nth-child(5){height:26px;animation-delay:.4s} .wbar:nth-child(6){height:17px;animation-delay:.5s}
+.wbar:nth-child(7){height:28px;animation-delay:.6s} .wbar:nth-child(8){height:20px;animation-delay:.7s}
+.wbar:nth-child(9){height:11px;animation-delay:.8s} .wbar:nth-child(10){height:7px;animation-delay:.9s}
+@keyframes wv { 0%,100%{transform:scaleY(.35);opacity:.3} 50%{transform:scaleY(1);opacity:1} }
+
+/* ──────────── FORMS ──────────── */
+.fgroup { display:flex; flex-direction:column; gap:3px; margin-bottom:8px; }
+.fgroup label { font-family:'Orbitron',sans-serif; font-size:7.5px; letter-spacing:2px; color:rgba(0,229,255,.45); }
+.fgroup input, .fgroup select, .fgroup textarea {
+  background:rgba(0,229,255,.04); border:1px solid rgba(0,229,255,.18);
+  color:var(--cyan); padding:6px 9px; font-family:'Rajdhani',sans-serif;
+  font-size:13px; outline:none; width:100%; transition:border-color .2s;
+}
+.fgroup input:focus, .fgroup select:focus, .fgroup textarea:focus {
+  border-color:var(--cyan); box-shadow:0 0 7px rgba(0,229,255,.2);
+}
+.fgroup select option { background:var(--dark); }
+.fgroup textarea { resize:vertical; min-height:60px; }
+.fbtn {
+  width:100%; background:rgba(0,229,255,.08); border:1px solid var(--cyan);
+  color:var(--cyan); padding:9px; cursor:pointer;
+  font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:2px;
+  transition:all .2s; text-transform:uppercase;
+}
+.fbtn:hover { background:rgba(0,229,255,.18); box-shadow:var(--glow); }
+.fbtn.danger { border-color:var(--red); color:var(--red); background:rgba(255,61,87,.06); }
+.fbtn.danger:hover { background:rgba(255,61,87,.15); box-shadow:0 0 15px rgba(255,61,87,.4); }
+.fbtn.gold  { border-color:var(--gold); color:var(--gold); background:rgba(255,193,7,.06); }
+.fbtn.gold:hover { background:rgba(255,193,7,.15); box-shadow:0 0 15px rgba(255,193,7,.4); }
+
+/* ──────────── PROGRESS BAR ──────────── */
+.prog-wrap { margin-top:8px; }
+.prog-label { font-family:'Orbitron',sans-serif; font-size:8px; letter-spacing:2px; color:rgba(0,229,255,.5); margin-bottom:4px; display:flex; justify-content:space-between; }
+.prog-bar { height:4px; background:rgba(0,229,255,.1); border-radius:2px; overflow:hidden; }
+.prog-fill { height:100%; background:linear-gradient(90deg,var(--blue),var(--cyan)); box-shadow:0 0 8px var(--cyan); border-radius:2px; transition:width .5s ease; }
+
+/* ──────────── UPLOAD DROP ZONE ──────────── */
+.drop-zone {
+  border:1px dashed rgba(0,229,255,.25); padding:16px; text-align:center;
+  cursor:pointer; transition:all .2s; position:relative;
+}
+.drop-zone:hover, .drop-zone.drag { border-color:var(--cyan); background:rgba(0,229,255,.06); box-shadow:var(--glow); }
+.drop-zone input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+.drop-icon { font-size:22px; margin-bottom:5px; opacity:.6; }
+.drop-text { font-family:'Orbitron',sans-serif; font-size:8px; letter-spacing:2px; color:rgba(0,229,255,.45); }
+
+/* ──────────── DOCUMENT LIST ──────────── */
+.doc-list { display:flex; flex-direction:column; gap:5px; max-height:140px; overflow-y:auto; }
+.doc-list::-webkit-scrollbar { width:2px; }
+.doc-list::-webkit-scrollbar-thumb { background:rgba(0,229,255,.2); }
+.doc-item {
+  padding:6px 9px; border:1px solid rgba(0,229,255,.12);
+  background:rgba(0,229,255,.03); font-size:11px;
+  display:flex; justify-content:space-between; align-items:center;
+  clip-path:polygon(0 0, calc(100%-5px) 0, 100% 5px, 100% 100%, 0 100%);
+}
+.doc-item .doc-name { color:rgba(0,229,255,.75); flex:1; font-size:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.doc-item .doc-stats { font-family:'Orbitron',sans-serif; font-size:7px; color:rgba(0,229,255,.35); flex-shrink:0; margin-left:6px; }
+
+/* ──────────── PROJECT TAGS ──────────── */
+.proj-list { display:flex; flex-direction:column; gap:5px; max-height:150px; overflow-y:auto; }
+.proj-tag {
+  padding:6px 9px; border:1px solid rgba(0,229,255,.12); background:rgba(0,229,255,.03);
+  clip-path:polygon(0 0, calc(100%-6px) 0, 100% 6px, 100% 100%, 0 100%);
+  display:flex; justify-content:space-between; align-items:center; font-size:11px;
+}
+.proj-tag .pname { color:rgba(0,229,255,.8); }
+.proj-tag .pprio {
+  font-family:'Orbitron',sans-serif; font-size:7px;
+  padding:1px 5px; border:1px solid; border-radius:1px;
+}
+.pprio.ALFA { border-color:var(--red); color:var(--red); }
+.pprio.BETA { border-color:var(--gold); color:var(--gold); }
+.pprio.GAMA { border-color:var(--green); color:var(--green); }
+
+/* ──────────── LOG ──────────── */
+.log-list { display:flex; flex-direction:column; gap:0; max-height:100px; overflow-y:auto; }
+.log-list::-webkit-scrollbar { width:2px; }
+.log-entry { font-size:10px; color:rgba(0,229,255,.42); padding:3px 0; border-bottom:1px solid rgba(0,229,255,.05); }
+.log-t { font-family:'Orbitron',sans-serif; font-size:7.5px; color:rgba(255,193,7,.5); margin-right:5px; }
+
+/* ──────────── TOAST ──────────── */
+.toast {
+  position:fixed; bottom:60px; left:50%; transform:translateX(-50%) translateY(12px);
+  background:rgba(0,20,50,.9); border:1px solid var(--cyan); color:var(--cyan);
+  padding:10px 22px; font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:2px;
+  opacity:0; transition:all .35s; pointer-events:none; z-index:200;
+  clip-path:polygon(7px 0, 100% 0, 100% calc(100%-7px), calc(100%-7px) 100%, 0 100%, 0 7px);
+  box-shadow:0 0 25px rgba(0,229,255,.3); text-align:center;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.toast.gold-t { border-color:var(--gold); color:var(--gold); box-shadow:0 0 25px rgba(255,193,7,.3); }
+
+/* ──────────── CORNERS ──────────── */
+.corner { position:fixed; width:50px; height:50px; pointer-events:none; z-index:50; }
+.corner::before, .corner::after { content:''; position:absolute; background:var(--cyan); box-shadow:0 0 5px var(--cyan); }
+.corner.tl { top:7px; left:7px; }
+.corner.tl::before { top:0; left:0; width:18px; height:1px; }
+.corner.tl::after  { top:0; left:0; width:1px; height:18px; }
+.corner.tr { top:7px; right:7px; }
+.corner.tr::before { top:0; right:0; width:18px; height:1px; }
+.corner.tr::after  { top:0; right:0; width:1px; height:18px; }
+.corner.bl { bottom:7px; left:7px; }
+.corner.bl::before { bottom:0; left:0; width:18px; height:1px; }
+.corner.bl::after  { bottom:0; left:0; width:1px; height:18px; }
+.corner.br { bottom:7px; right:7px; }
+.corner.br::before { bottom:0; right:0; width:18px; height:1px; }
+.corner.br::after  { bottom:0; right:0; width:1px; height:18px; }
+
+/* ──────────── BOTTOM BAR ──────────── */
+.botbar {
+  padding:7px 28px; border-top:1px solid var(--border);
+  display:flex; justify-content:space-between;
+  font-family:'Orbitron',sans-serif; font-size:8px; letter-spacing:2px;
+  color:rgba(0,229,255,.28); background:rgba(1,10,24,.9); flex-shrink:0;
+}
+
+/* ──────────── ENERGY ──────────── */
+.energy-val { text-align:center; }
+.energy-val .ev { font-family:'Orbitron',sans-serif; font-size:26px; font-weight:900; color:var(--cyan); text-shadow:var(--glow-lg); }
+.energy-val .et { font-size:9px; letter-spacing:1px; color:rgba(0,229,255,.4); margin-top:2px; }
+
+/* ──────────── TABS ──────────── */
+.tabs { display:flex; gap:2px; margin-bottom:10px; }
+.tab {
+  flex:1; text-align:center; padding:5px;
+  font-family:'Orbitron',sans-serif; font-size:7px; letter-spacing:1.5px;
+  border:1px solid rgba(0,229,255,.15); cursor:pointer; transition:all .2s; color:rgba(0,229,255,.45);
+}
+.tab.active { border-color:var(--cyan); color:var(--cyan); background:rgba(0,229,255,.08); box-shadow:var(--glow); }
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+</style>
+</head>
+<body>
+
+<!-- Corner decorations -->
+<div class="corner tl"></div><div class="corner tr"></div>
+<div class="corner bl"></div><div class="corner br"></div>
+<div class="toast" id="toast"></div>
+
+<div class="hud">
+
+<!-- ──── TOP BAR ──── -->
+<div class="topbar">
+  <div class="logo">J.A.R.V.I.S</div>
+
+  <div class="topbar-center">
+    <div class="status-pill online" id="conn-status">
+      <span class="blink"></span>CONECTADO
+    </div>
+    <div class="status-pill" id="model-status" style="border-color:rgba(0,229,255,.3);color:rgba(0,229,255,.5)">
+      <span class="blink" style="background:rgba(0,229,255,.5);box-shadow:0 0 5px rgba(0,229,255,.5)"></span>
+      MODELO: AGUARDANDO
+    </div>
+  </div>
+
+  <div class="clock" id="clock">--:--:--</div>
+</div>
+
+<!-- ──── MAIN ──── -->
+<div class="main">
+
+<!-- ── LEFT ── -->
+<div class="left">
+
+  <!-- Radar -->
+  <div class="panel">
+    <div class="plabel">▸ Sensor Array</div>
+    <div class="radar">
+      <svg viewBox="0 0 128 128">
+        <circle class="r-ring" cx="64" cy="64" r="55"/>
+        <circle class="r-ring" cx="64" cy="64" r="40"/>
+        <circle class="r-ring" cx="64" cy="64" r="25"/>
+        <line stroke="rgba(0,229,255,.12)" stroke-width="1" x1="9" y1="64" x2="119" y2="64"/>
+        <line stroke="rgba(0,229,255,.12)" stroke-width="1" x1="64" y1="9" x2="64" y2="119"/>
+        <g class="r-sweep">
+          <path d="M64,64 L64,9 A55,55 0 0,1 119,64 Z" fill="url(#sg)" opacity=".35"/>
+        </g>
+        <circle class="r-dot" cx="80" cy="40" r="3"/>
+        <circle class="r-dot" cx="44" cy="76" r="2.5" style="animation-delay:.7s"/>
+        <circle class="r-dot" cx="88" cy="82" r="2" style="animation-delay:1.4s"/>
+        <defs>
+          <radialGradient id="sg" cx="64" cy="64" r="55" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="rgba(0,229,255,.7)"/>
+            <stop offset="100%" stop-color="rgba(0,229,255,0)"/>
+          </radialGradient>
+        </defs>
+      </svg>
+    </div>
+  </div>
+
+  <!-- CPU / RAM / DISK -->
+  <div class="panel">
+    <div class="plabel">▸ Hardware Monitor</div>
+    <div class="m-row"><span class="m-label">CPU</span><span class="m-val" id="cpu-val">--%</span></div>
+    <div class="m-bar"><div class="m-fill" id="cpu-bar" style="width:0%"></div></div>
+    <div class="m-row"><span class="m-label">RAM</span><span class="m-val" id="ram-val">--%</span></div>
+    <div class="m-bar"><div class="m-fill" id="ram-bar" style="width:0%"></div></div>
+    <div class="m-row"><span class="m-label">DISCO</span><span class="m-val" id="disk-val">--%</span></div>
+    <div class="m-bar"><div class="m-fill" id="disk-bar" style="width:0%"></div></div>
+    <div class="m-row" style="margin-top:6px"><span class="m-label">REDE ↑</span><span class="m-val" id="net-val" style="font-size:9px">-- MB</span></div>
+    <div class="m-row"><span class="m-label">TEMP</span><span class="m-val" id="temp-val" style="font-size:9px">--°C</span></div>
+  </div>
+
+  <!-- System Log -->
+  <div class="panel">
+    <div class="plabel">▸ Log do Sistema</div>
+    <div class="log-list" id="sys-log"></div>
+  </div>
+
+  <!-- Projects list -->
+  <div class="panel" id="proj-panel" style="display:none">
+    <div class="plabel">▸ Projetos Registrados</div>
+    <div class="proj-list" id="proj-list"></div>
+  </div>
+
+</div>
+
+<!-- ── CENTER ── -->
+<div class="center">
+
+  <!-- Arc Reactor -->
+  <div class="arc-zone">
+    <div class="arc">
+      <svg viewBox="0 0 100 100">
+        <circle class="arc-ring1" cx="50" cy="50" r="44"/>
+        <polygon points="50,18 82,68 18,68" fill="none" stroke="rgba(0,229,255,.1)" stroke-width="1"/>
+        <polygon points="50,82 82,32 18,32" fill="none" stroke="rgba(0,119,255,.1)" stroke-width="1"/>
+        <circle class="arc-ring2" cx="50" cy="50" r="32"/>
+        <circle class="arc-ring3" cx="50" cy="50" r="20" stroke-dasharray="3 2.5"/>
+        <circle class="arc-core" cx="50" cy="50" r="9"/>
+        <circle cx="50" cy="50" r="5" fill="white" opacity=".88"/>
+      </svg>
+    </div>
+    <div class="arc-label">STARK TECH v4.1 — REATOR ARC</div>
+  </div>
+
+  <!-- Chat Window -->
+  <div class="chat-wrap">
+    <div class="chat-hdr">
+      <span>▸ INTERFACE DE COMUNICAÇÃO SEGURA</span>
+      <span id="msg-count">0 MSG</span>
+    </div>
+    <div class="messages" id="messages">
+      <div class="msg j">
+        <div class="avatar j">AI</div>
+        <div>
+          <div class="bname">J.A.R.V.I.S</div>
+          <div class="bubble">Sistemas online. Aguardando instruções, Senhor. Para começar, faça upload de documentos PDF para me treinar.</div>
+        </div>
+      </div>
+    </div>
+    <div class="typing" id="typing">
+      <div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>
+    </div>
+    <div class="input-zone">
+      <span class="input-pre">» SR. STARK</span>
+      <input class="ifield" id="ifield" type="text" placeholder="Digite sua mensagem…" autocomplete="off"/>
+      <button class="send-btn" onclick="sendMsg()">ENVIAR</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── RIGHT ── -->
+<div class="right">
+
+  <!-- Voice viz -->
+  <div class="panel">
+    <div class="plabel">▸ Canal de Voz</div>
+    <div class="wave">
+      <div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div>
+      <div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div>
+      <div class="wbar"></div><div class="wbar"></div>
+    </div>
+    <div style="text-align:center;font-family:'Orbitron',sans-serif;font-size:7.5px;letter-spacing:2px;color:rgba(0,229,255,.35);margin-top:5px">LINHA SEGURA ATIVA</div>
+  </div>
+
+  <!-- Tabs: PDF / Treinar / Projeto -->
+  <div class="panel" style="flex:1">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('docs')" id="tab-docs">DOCS</div>
+      <div class="tab" onclick="switchTab('train')" id="tab-train">TREINAR</div>
+      <div class="tab" onclick="switchTab('project')" id="tab-project">PROJETO</div>
+    </div>
+
+    <!-- DOCS TAB -->
+    <div class="tab-content active" id="tc-docs">
+      <div class="drop-zone" id="drop-zone"
+           ondragover="ev.preventDefault();this.classList.add('drag')"
+           ondragleave="this.classList.remove('drag')"
+           ondrop="handleDrop(event)">
+        <input type="file" accept=".pdf" multiple onchange="handleFiles(this.files)" id="file-input"/>
+        <div class="drop-icon">📄</div>
+        <div class="drop-text">ARRASTE PDFs AQUI<br>OU CLIQUE PARA SELECIONAR</div>
+      </div>
+      <div id="upload-progress" style="display:none;margin-top:8px">
+        <div class="prog-wrap">
+          <div class="prog-label"><span>PROCESSANDO</span><span id="uprog-pct">0%</span></div>
+          <div class="prog-bar"><div class="prog-fill" id="uprog-fill" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <div class="plabel">▸ Documentos Indexados</div>
+        <div class="doc-list" id="doc-list">
+          <div style="font-size:10px;color:rgba(0,229,255,.3);text-align:center;padding:8px">Nenhum documento ainda</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRAIN TAB -->
+    <div class="tab-content" id="tc-train">
+      <div style="font-size:11px;color:rgba(0,229,255,.6);margin-bottom:10px;line-height:1.6">
+        O modelo Transformer será treinado do zero com os documentos carregados.
+        Rede neural com atenção multi-cabeça, BPE tokenizer e geração autoregressiva.
+      </div>
+      <div class="prog-wrap" id="train-prog-wrap" style="display:none">
+        <div class="prog-label">
+          <span>TREINANDO</span>
+          <span id="train-pct">0%</span>
+        </div>
+        <div class="prog-bar"><div class="prog-fill" id="train-fill" style="width:0%"></div></div>
+        <div style="margin-top:5px;font-family:'Orbitron',sans-serif;font-size:8px;color:rgba(0,229,255,.4)" id="train-info">Aguardando...</div>
+      </div>
+      <div id="train-log" style="max-height:120px;overflow-y:auto;margin:8px 0;font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(0,229,255,.5);background:rgba(0,229,255,.03);padding:6px;border:1px solid rgba(0,229,255,.08)"></div>
+      <button class="fbtn gold" onclick="startTraining()" id="train-btn">⬡ INICIAR TREINAMENTO NEURAL</button>
+      <div id="train-status" style="margin-top:8px;font-size:10px;color:rgba(0,229,255,.45)">
+        Aguardando documentos...
+      </div>
+    </div>
+
+    <!-- PROJECT TAB -->
+    <div class="tab-content" id="tc-project">
+      <div class="fgroup">
+        <label>Nome do Projeto</label>
+        <input type="text" id="pj-name" placeholder="Ex: Iron Man MK-50"/>
+      </div>
+      <div class="fgroup">
+        <label>Tipo / Categoria</label>
+        <select id="pj-type">
+          <option value="">Selecione...</option>
+          <option>Armamento</option>
+          <option>Energia</option>
+          <option>Software / IA</option>
+          <option>Biotecnologia</option>
+          <option>Infraestrutura</option>
+          <option>Pesquisa</option>
+          <option>Outro</option>
+        </select>
+      </div>
+      <div class="fgroup">
+        <label>Prioridade</label>
+        <select id="pj-priority">
+          <option value="ALFA">🔴 ALFA — Crítica</option>
+          <option value="BETA" selected>🟡 BETA — Alta</option>
+          <option value="GAMA">🟢 GAMA — Normal</option>
+        </select>
+      </div>
+      <div class="fgroup">
+        <label>Descrição</label>
+        <textarea id="pj-desc" placeholder="Descreva o projeto..."></textarea>
+      </div>
+      <button class="fbtn" onclick="saveProject()">⬡ REGISTRAR PROJETO</button>
+    </div>
+  </div>
+
+  <!-- Energy -->
+  <div class="panel">
+    <div class="plabel">▸ Reator Arc</div>
+    <div class="energy-val">
+      <div class="ev" id="energy-val">--%</div>
+      <div class="et">REATOR ARC — ESTÁVEL</div>
+    </div>
+    <div class="m-bar" style="margin-top:8px">
+      <div class="m-fill" id="energy-bar" style="width:0%;background:linear-gradient(90deg,#0077ff,#00e5ff)"></div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /main -->
+
+<!-- BOTTOM BAR -->
+<div class="botbar">
+  <span>STARK INDUSTRIES © 3000</span>
+  <span id="session-info">SESSÃO ATIVA — 0 EVENTOS</span>
+  <span id="sys-platform">PLATAFORMA: --</span>
+</div>
+
+</div><!-- /hud -->
+
+<script>
+// ─── Config ───────────────────────────────────────────────────────────────────
+// RESOLUÇÃO DE REDE: Ligação estática absoluta ao FastAPI local.
+const API = 'http://localhost:8000';
+const WS_URL = 'ws://localhost:8000/ws';
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let msgCount = 0, eventCount = 0;
+let ws = null;
+let documents = [];
+
+// ─── Clock ────────────────────────────────────────────────────────────────────
+function tick() {
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('pt-BR', { hour12: false });
+}
+setInterval(tick, 1000); tick();
+
+// ─── WebSocket ────────────────────────────────────────────────────────────────
+function connectWS() {
+  try {
+    ws = new WebSocket(WS_URL);
+    ws.onopen    = () => { setConnStatus(true); addLog('WebSocket conectado a localhost:8000'); };
+    ws.onclose   = () => { setConnStatus(false); setTimeout(connectWS, 3000); };
+    ws.onerror   = () => { setConnStatus(false); };
+    ws.onmessage = (e) => handleWS(JSON.parse(e.data));
+  } catch (ex) {
+    setConnStatus(false);
+    setTimeout(connectWS, 3000);
+  }
+}
+connectWS();
+
+function handleWS(msg) {
+  if (msg.type === 'metrics')        updateMetrics(msg.data);
+  if (msg.type === 'init')           handleInit(msg.data);
+  if (msg.type === 'train_progress') updateTrainProgress(msg.data);
+  if (msg.type === 'pdf_processed') {
+    showToast(`✦ ${msg.message}`);
+    addLog(msg.message);
+    loadDocuments();
+  }
+}
+
+function handleInit(data) {
+  if (data.is_trained)  setModelStatus('trained');
+  if (data.is_training) setModelStatus('training');
+  if (data.projects)    data.projects.forEach(addProjectTag);
+}
+
+// ─── Metrics Update ───────────────────────────────────────────────────────────
+function updateMetrics(data) {
+  if (!data) return;
+  const cpu  = data.cpu  || {};
+  const mem  = data.memory || {};
+  const disk = data.disk || {};
+  const net  = data.network || {};
+
+  setBar('cpu-val',  'cpu-bar',  cpu.percent !== undefined ? cpu.percent : cpu);
+  setBar('ram-val',  'ram-bar',  mem.percent !== undefined ? mem.percent : data.ram);
+  setBar('disk-val', 'disk-bar', disk.percent !== undefined ? disk.percent : data.disk);
+
+  document.getElementById('net-val').textContent  = (net.bytes_sent_mb || 0) + ' MB';
+  document.getElementById('temp-val').textContent = cpu.temperature ? cpu.temperature + '°C' : 'N/A';
+
+  const energy = 90 + Math.round(Math.random() * 8);
+  document.getElementById('energy-val').textContent = energy + '%';
+  document.getElementById('energy-bar').style.width  = energy + '%';
+
+  document.getElementById('sys-platform').textContent = 'PLATAFORMA: ' + (data.platform || 'x86_64');
+}
+
+function setBar(valId, barId, pct) {
+  if (pct === undefined || pct === null) return;
+  document.getElementById(valId).textContent = pct + '%';
+  const bar = document.getElementById(barId);
+  bar.style.width = pct + '%';
+  bar.className = 'm-fill' + (pct > 90 ? ' crit' : pct > 75 ? ' warn' : '');
+}
+
+// ─── Status Pills ─────────────────────────────────────────────────────────────
+function setConnStatus(online) {
+  const el = document.getElementById('conn-status');
+  el.className = 'status-pill ' + (online ? 'online' : 'offline');
+  el.innerHTML = `<span class="blink"></span>${online ? 'CONECTADO' : 'DESCONECTADO'}`;
+}
+
+function setModelStatus(state) {
+  const el = document.getElementById('model-status');
+  const map = {
+    'trained':  ['online',   'MODELO: ATIVO'],
+    'training': ['training', 'MODELO: TREINANDO'],
+    'waiting':  ['offline',  'MODELO: AGUARDANDO'],
+  };
+  const [cls, txt] = map[state] || map['waiting'];
+  el.className = 'status-pill ' + cls;
+  el.innerHTML = `<span class="blink"></span>${txt}`;
+}
+
+// ─── Chat ─────────────────────────────────────────────────────────────────────
+async function sendMsg() {
+  const field = document.getElementById('ifield');
+  const text  = field.value.trim();
+  if (!text) return;
+  field.value = '';
+
+  addMessage(text, 'user');
+
+  const typing = document.getElementById('typing');
+  typing.classList.add('on');
+  scrollChat();
+
+  try {
+    const res  = await fetch(API + '/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text }),
+    });
+    const data = await res.json();
+    typing.classList.remove('on');
+    
+    // CORREÇÃO: Chave de resposta sincronizada com o motor neural RAG (answer)
+    const msgResponse = data.answer || data.response || data.text || "Falha na decodificação do tensor de saída.";
+    addMessage(msgResponse, 'jarvis', data.sources);
+
+    // Handle actions
+    if (data.action === 'open_project_form') switchTab('project');
+    if (data.action === 'show_train_panel')  switchTab('train');
+    if (data.action === 'update_metrics' && data.data) updateMetrics(data.data);
+  } catch (e) {
+    typing.classList.remove('on');
+    console.error("Erro na comunicação com a API:", e);
+    addMessage('Falha de comunicação, Senhor. Verifique se o servidor Python está executando em http://localhost:8000.', 'jarvis');
+  }
+}
+
+function addMessage(text, role, sources) {
+  const box = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = `msg ${role === 'jarvis' ? 'j' : 'user'}`;
+
+  const avatar  = role === 'jarvis' ? 'AI' : 'TS';
+  const aClass  = role === 'jarvis' ? 'j' : 'u';
+  const bname   = role === 'jarvis' ? 'J.A.R.V.I.S' : 'SR. STARK';
+
+  let sourcesHtml = '';
+  if (sources && sources.length > 0) {
+    sourcesHtml = `<div class="sources">${sources.map(s =>
+      `<span class="src-badge">📄 ${s.source} (${(s.score*100).toFixed(0)}%)</span>`
+    ).join('')}</div>`;
+  }
+
+  div.innerHTML = `
+    <div class="avatar ${aClass}">${avatar}</div>
+    <div>
+      <div class="bname">${bname}</div>
+      <div class="bubble">${text}${sourcesHtml}</div>
+    </div>`;
+
+  box.appendChild(div);
+  scrollChat();
+  msgCount++;
+  eventCount++;
+  document.getElementById('msg-count').textContent = msgCount + ' MSG';
+  document.getElementById('session-info').textContent = `SESSÃO ATIVA — ${eventCount} EVENTOS`;
+  addLog(role === 'jarvis' ? 'Resposta JARVIS enviada' : 'Entrada do usuário');
+}
+
+function scrollChat() {
+  const box = document.getElementById('messages');
+  box.scrollTop = box.scrollHeight;
+}
+
+document.getElementById('ifield').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendMsg();
+});
+
+// ─── PDF Upload ───────────────────────────────────────────────────────────────
+function handleDrop(ev) {
+  ev.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag');
+  const files = ev.dataTransfer.files;
+  handleFiles(files);
+}
+
+function handleFiles(files) {
+  const pdfs = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.pdf'));
+  if (!pdfs.length) { showToast('⚠ Apenas arquivos PDF são aceitos'); return; }
+  pdfs.forEach(uploadPDF);
+}
+
+async function uploadPDF(file) {
+  showToast(`⬡ Carregando: ${file.name}`);
+  const prog = document.getElementById('upload-progress');
+  const fill = document.getElementById('uprog-fill');
+  const pct  = document.getElementById('uprog-pct');
+  prog.style.display = 'block';
+  fill.style.width = '10%'; pct.textContent = '10%';
+
+  const fd = new FormData();
+  fd.append('file', file);
+  fill.style.width = '40%'; pct.textContent = '40%';
+
+  try {
+    const res  = await fetch(API + '/api/pdf/upload', { method:'POST', body:fd });
+    const data = await res.json();
+    fill.style.width = '100%'; pct.textContent = '100%';
+
+    if (data.success) {
+      addMessage(
+        `Documento <strong>${file.name}</strong> processado com sucesso, Senhor. ` +
+        `${data.pages} páginas, ${data.words?.toLocaleString()} palavras.`,
+        'jarvis'
+      );
+      loadDocuments();
+    }
+  } catch (e) {
+    console.error("Upload Error:", e);
+    showToast('⚠ Erro ao processar PDF. Verifique o servidor localhost:8000.');
+  }
+  setTimeout(() => { prog.style.display='none'; fill.style.width='0%'; }, 1500);
+}
+
+async function loadDocuments() {
+  try {
+    const res  = await fetch(API + '/api/documents');
+    const data = await res.json();
+    documents = data.documents || [];
+    renderDocList();
+  } catch(e) {
+    console.warn("Nenhum documento detectado (ou servidor offline).");
+  }
+}
+
+function renderDocList() {
+  const el = document.getElementById('doc-list');
+  if (documents.length === 0) {
+    el.innerHTML = '<div style="font-size:10px;color:rgba(0,229,255,.3);text-align:center;padding:8px">Nenhum documento ainda</div>';
+    return;
+  }
+  el.innerHTML = documents.map(d => `
+    <div class="doc-item">
+      <span class="doc-name" title="${d.filename}">${d.filename || 'Documento'}</span>
+      <span class="doc-stats">${d.pages || 0}p · ${(d.words||0).toLocaleString()}w</span>
+    </div>`).join('');
+}
+
+// ─── Training ─────────────────────────────────────────────────────────────────
+async function startTraining() {
+  const btn = document.getElementById('train-btn');
+  btn.disabled = true; btn.textContent = '⏳ TREINANDO...';
+  document.getElementById('train-prog-wrap').style.display = 'block';
+  setModelStatus('training');
+  addMessage('Iniciando convergência dos gradientes no modelo neural, Senhor. Aguarde a validação dos tensores...', 'jarvis');
+  addLog('Treinamento neural iniciado');
+
+  try {
+    await fetch(API + '/api/train/start', { method:'POST' });
+  } catch(e) {
+    console.error("Training Error:", e);
+    showToast('⚠ Erro de sub-rotina ao invocar o optimizador no localhost.'); btn.disabled=false;
+  }
+}
+
+function updateTrainProgress(data) {
+  const log  = document.getElementById('train-log');
+  const fill = document.getElementById('train-fill');
+  const pct  = document.getElementById('train-pct');
+  const info = document.getElementById('train-info');
+  const btn  = document.getElementById('train-btn');
+
+  if (data.error) {
+    log.innerHTML += `<div style="color:var(--red)">ERRO: ${data.error}</div>`;
+    btn.disabled = false; btn.textContent = '⬡ INICIAR TREINAMENTO NEURAL';
+    setModelStatus('waiting');
+    return;
+  }
+
+  if (data.percent !== undefined) {
+    fill.style.width = data.percent + '%'; pct.textContent = data.percent + '%';
+    info.textContent = `Epoch: ${data.epoch}/${data.total} | Loss: ${data.loss || '--'}`;
+    log.innerHTML += `<div>Epoch ${data.epoch} | Gradiente Mínimo Alcançado: ${data.loss}</div>`;
+    log.scrollTop = log.scrollHeight;
+    
+    if (data.percent >= 100) {
+        info.textContent = 'CONVERGÊNCIA CONCLUÍDA';
+        btn.disabled = false; btn.textContent = '✓ MODELO TREINADO';
+        setModelStatus('trained');
+        showToast('✦ MODELO NEURAL COMPILADO COM SUCESSO');
+        addMessage('Retropropagação concluída, Senhor. Pesos sinápticos atualizados. A inteligência artificial operante.', 'jarvis');
+        loadDocuments();
+    }
+  }
+}
+
+// ─── Projects ─────────────────────────────────────────────────────────────────
+async function saveProject() {
+  const name = document.getElementById('pj-name').value.trim();
+  const type = document.getElementById('pj-type').value;
+  const prio = document.getElementById('pj-priority').value;
+  const desc = document.getElementById('pj-desc').value.trim();
+
+  if (!name || !type) { showToast('⚠ Erro de validação: Parâmetros Nome/Tipo ausentes.'); return; }
+
+  try {
+    const res = await fetch(API + '/api/project/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, type, priority: prio, description: desc, tags: [] }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      addProjectTag(data.project);
+      addMessage(
+        `Projeto <strong>${name}</strong> registado na base de dados da Stark Industries, Senhor. ` +
+        `Matriz de prioridade: ${prio}. Mapeamento de recursos alocado no disco físico.`,
+        'jarvis'
+      );
+      showToast(`✦ PROJETO "${name.toUpperCase()}" REGISTRADO`);
+      ['pj-name','pj-desc'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('pj-type').value = '';
+    }
+  } catch(e) { showToast('⚠ Erro de serialização I/O ao persistir o projeto.'); }
+}
+
+function addProjectTag(proj) {
+  const panel = document.getElementById('proj-panel');
+  const list  = document.getElementById('proj-list');
+  panel.style.display = 'block';
+  const div = document.createElement('div');
+  div.className = 'proj-tag';
+  div.innerHTML = `<span class="pname">${proj.name}</span><span class="pprio ${proj.priority}">${proj.priority}</span>`;
+  list.appendChild(div);
+}
+
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
+function switchTab(id) {
+  ['docs','train','project'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t===id);
+    document.getElementById('tc-'+t).classList.toggle('active', t===id);
+  });
+}
+
+// ─── Syslog ───────────────────────────────────────────────────────────────────
+const autoLogs = ['Varredura de portas OK','Firewall de camada OSI atualizado','Criptografia assimétrica ativa','Backup RAID-1 realizado','Sincronização LEO (Satélite) OK'];
+function addLog(msg) {
+  const el  = document.getElementById('sys-log');
+  const now = new Date().toLocaleTimeString('pt-BR',{hour12:false,hour:'2-digit',minute:'2-digit'});
+  const row = document.createElement('div');
+  row.className = 'log-entry';
+  row.innerHTML = `<span class=\"log-t\">${now}</span>${msg}`;
+  el.appendChild(row);
+  while (el.children.length > 8) el.removeChild(el.firstChild);
+  el.scrollTop = el.scrollHeight;
+  eventCount++;
+  document.getElementById('session-info').textContent = `SESSÃO ATIVA — ${eventCount} EVENTOS`;
+}
+setInterval(() => addLog(autoLogs[Math.floor(Math.random()*autoLogs.length)]), 7000);
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+function showToast(msg, gold=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (gold ? ' gold-t' : '');
+  setTimeout(() => t.className = 'toast', 3500);
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+loadDocuments();
+addLog('Microkernel do J.A.R.V.I.S inicializado');
+addLog('DOM Renderizado / Interface HUD carregada');
+</script>
+</body>
+</html>
