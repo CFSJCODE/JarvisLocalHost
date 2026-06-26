@@ -120,7 +120,7 @@ class PDFProcessor:
         )
 
         self._save_corpus(result)
-        print(f"[PDFProcessor] Done — {word_count} words, "
+        print(f"[PDFProcessor] Done - {word_count} words, "
               f"{len(chunks)} chunks, {len(tables)} tables, {len(images)} images")
         return result
 
@@ -352,4 +352,4 @@ class PDFProcessor:
             }, ensure_ascii=False, indent=2),
             encoding="utf-8"
         )
-        print(f"[PDFProcessor] Saved corpus → {corpus_path}")
+        print(f"[PDFProcessor] Saved corpus -> {corpus_path}")

@@ -1,0 +1,1625 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>J.A.R.V.I.S — Stark Industries</title>
+<style>
+:root {
+  --cyan:      #22d3ee;
+  --blue:      #1b4b6b;
+  --gold:      #f18821;
+  --orange:    #ff7a1a;
+  --red:       #ff3d57;
+  --green:     #22c55e;
+  --dark:      #07131d;
+  --mid:       #0f2d40;
+  --panel:     rgba(15,45,64,.97);
+  --panel-2:   rgba(8,31,47,.985);
+  --border:    rgba(34, 211, 238, 0.58);
+  --border-2:  rgba(241, 136, 33, 0.54);
+  --text:      #f8fafc;
+  --muted:     #dbeafe;
+  --glow:      0 0 20px rgba(34, 211, 238, 0.50);
+  --glow-lg:   0 0 40px rgba(34, 211, 238, 0.68);
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background:
+    linear-gradient(135deg, rgba(34,211,238,.14) 0%, transparent 34%),
+    linear-gradient(315deg, rgba(241,136,33,.12) 0%, transparent 32%),
+    linear-gradient(180deg, #0f2d40 0%, #07131d 58%, #0b1c2a 100%);
+  font-family: 'Rajdhani', sans-serif;
+  color: var(--text);
+  height: 100vh;
+  overflow: hidden;
+  position: relative;
+}
+
+/* Grid background */
+body::before {
+  content:''; position:fixed; inset:0;
+  background-image:
+    linear-gradient(rgba(34,211,238,.10) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(34,211,238,.075) 1px, transparent 1px);
+  background-size: 44px 44px;
+  pointer-events:none; z-index:0;
+}
+
+/* Scanlines */
+body::after {
+  content:''; position:fixed; inset:0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,.045) 2px, rgba(0,0,0,.045) 4px);
+  pointer-events:none; z-index:99;
+  animation: scan 10s linear infinite;
+}
+@keyframes scan { to { background-position: 0 100px; } }
+
+/* ──────────── LAYOUT ──────────── */
+.hud { position:fixed; inset:0; display:flex; flex-direction:column; z-index:1; }
+
+/* TOP BAR */
+.topbar {
+  display:flex; justify-content:space-between; align-items:center;
+  padding: 10px 28px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(7, 19, 29, .985);
+  position: relative; flex-shrink:0;
+}
+.topbar::after {
+  content:''; position:absolute; bottom:-1px; left:0; right:0; height:1px;
+  background: linear-gradient(90deg, transparent, var(--cyan) 25%, var(--orange) 75%, transparent);
+  animation: glow-h 3s ease-in-out infinite;
+}
+@keyframes glow-h { 0%,100%{opacity:.3} 50%{opacity:1} }
+
+.logo {
+  font-family:'Orbitron', sans-serif; font-size:20px; font-weight:900;
+  letter-spacing:7px; color:var(--cyan);
+  text-shadow: 0 0 20px rgba(34,211,238,.8), 0 0 36px rgba(255,122,26,.34);
+  animation: logo-pulse 2.5s ease-in-out infinite;
+}
+@keyframes logo-pulse {
+  0%,100%{ text-shadow: 0 0 15px rgba(34,211,238,.55); }
+  50%    { text-shadow: 0 0 30px rgba(34,211,238,1), 0 0 50px rgba(255,122,26,.42); }
+}
+
+.topbar-center { display:flex; gap:24px; align-items:center; }
+.status-pill {
+  font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:2px;
+  padding:4px 12px; border:1px solid; border-radius:2px;
+  display:flex; align-items:center; gap:7px;
+}
+.status-pill.online { border-color:var(--green); color:var(--green); }
+.status-pill.training { border-color:var(--gold); color:var(--gold); }
+.status-pill.offline { border-color:var(--red); color:var(--red); }
+.blink { width:6px;height:6px;border-radius:50%;background:currentColor;
+         box-shadow:0 0 6px currentColor; animation:blink 1.2s ease-in-out infinite; }
+@keyframes blink { 0%,100%{opacity:1} 50%{opacity:.1} }
+
+.clock { font-family:'Orbitron',sans-serif;font-size:13px;letter-spacing:3px;opacity:.8; }
+
+/* MAIN */
+.main { flex:1; display:flex; gap:14px; padding:14px 18px; overflow:hidden; min-height:0; }
+
+/* PANELS */
+.panel {
+  border:1px solid var(--border); background:var(--panel);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.045), 0 14px 32px rgba(0,0,0,.48), 0 0 24px rgba(34,211,238,.08);
+  padding:14px; position:relative; flex-shrink:0;
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+}
+.panel::before {
+  content:''; position:absolute; top:0; left:0; width:30px; height:1px;
+  background:var(--orange); box-shadow:0 0 8px var(--orange);
+}
+.plabel {
+  font-family:'Orbitron',sans-serif; font-size:8px; letter-spacing:3px;
+  color:#f8fafc; margin-bottom:10px; text-transform:uppercase;
+  text-shadow:0 0 10px rgba(34,211,238,.35);
+}
+
+/* LEFT PANEL */
+.left { width:210px; display:flex; flex-direction:column; gap:12px; overflow-y:auto; overflow-x:hidden; }
+.left::-webkit-scrollbar { width:2px; }
+.left::-webkit-scrollbar-thumb { background:rgba(34,211,238,.2); }
+
+/* CENTER */
+.center { flex:1; display:flex; flex-direction:column; gap:12px; min-width:0; }
+
+/* RIGHT PANEL */
+.right { width:300px; display:flex; flex-direction:column; gap:12px; overflow-y:auto; overflow-x:hidden; }
+.right::-webkit-scrollbar { width:2px; }
+.right::-webkit-scrollbar-thumb { background:rgba(34,211,238,.2); }
+
+/* ──────────── RADAR ──────────── */
+.radar { width:128px; height:128px; margin:0 auto; }
+.radar svg { width:100%; height:100%; }
+.r-ring { fill:none; stroke:rgba(34,211,238,.12); stroke-width:1; }
+.r-sweep { transform-origin:64px 64px; animation:spin 3.5s linear infinite; }
+@keyframes spin { to { transform:rotate(360deg); } }
+.r-dot { fill:var(--cyan); filter:drop-shadow(0 0 4px var(--cyan)); animation:rdot 2s ease-in-out infinite; }
+@keyframes rdot { 0%,100%{r:2.5} 50%{r:4.5} }
+
+/* ──────────── METRICS ──────────── */
+.m-row { display:flex; justify-content:space-between; align-items:center; margin-bottom:5px; }
+.m-label { font-family:'Orbitron',sans-serif; font-size:9px; color:rgba(219,234,254,.86); letter-spacing:1px; }
+.m-val { font-family:'Orbitron',sans-serif; font-size:11px; color:var(--cyan); text-shadow:0 0 6px var(--cyan); }
+.m-bar { height:2.5px; background:rgba(34,211,238,.08); border-radius:2px; margin-bottom:8px; overflow:hidden; }
+.m-fill { height:100%; background:linear-gradient(90deg,var(--blue),var(--cyan)); box-shadow:0 0 5px var(--cyan); border-radius:2px; transition:width .8s ease; }
+.m-fill.warn { background:linear-gradient(90deg,#ff7a1a,var(--gold)); }
+.m-fill.crit { background:linear-gradient(90deg,#b71c1c,var(--red)); }
+
+/* ──────────── ARC REACTOR ──────────── */
+.arc-zone { display:flex; justify-content:center; align-items:center; padding:12px 0 6px; position:relative; flex-shrink:0; }
+.arc { width:100px; height:100px; }
+.arc svg { width:100%; height:100%; animation:arc-pulse 2s ease-in-out infinite; }
+@keyframes arc-pulse {
+  0%,100%{ filter:drop-shadow(0 0 6px rgba(34,211,238,.5)); }
+  50%    { filter:drop-shadow(0 0 18px rgba(34,211,238,1)) drop-shadow(0 0 36px rgba(34,211,238,.5)); }
+}
+.arc-ring1 { fill:none; stroke:rgba(34,211,238,.35); stroke-width:2; stroke-dasharray:8 5; animation:cspin 6s linear infinite; transform-origin:50px 50px; }
+.arc-ring2 { fill:none; stroke:rgba(27,75,107,.55); stroke-width:3; stroke-dasharray:5 4; animation:spin 3.5s linear infinite; transform-origin:50px 50px; }
+.arc-ring3 { fill:none; stroke:var(--cyan); stroke-width:2; animation:cspin 2.5s linear infinite; transform-origin:50px 50px; }
+.arc-core  { fill:var(--cyan); filter:drop-shadow(0 0 8px var(--cyan)); animation:core-p 1.8s ease-in-out infinite; }
+@keyframes cspin { to { transform:rotate(-360deg); } }
+@keyframes core-p { 0%,100%{opacity:.7} 50%{opacity:1} }
+.arc-label {
+  position:absolute; bottom:2px; font-family:'Orbitron',sans-serif;
+  font-size:8px; letter-spacing:3px; color:rgba(219,234,254,.72);
+}
+
+/* ──────────── CHAT ──────────── */
+.chat-wrap {
+  flex:1; display:flex; flex-direction:column;
+  border:1px solid var(--border); background:var(--panel-2); min-height:0;
+  clip-path:polygon(0 0, calc(100% - 14px) 0, 100% 14px, 100% 100%, 14px 100%, 0 calc(100% - 14px));
+}
+.chat-hdr {
+  padding:8px 14px; border-bottom:1px solid var(--border);
+  font-family:'Orbitron',sans-serif; font-size:8px; letter-spacing:2.5px;
+  color:rgba(232,247,255,.72); display:flex; justify-content:space-between; flex-shrink:0;
+}
+.messages {
+  flex:1; overflow-y:auto; padding:14px; display:flex;
+  flex-direction:column; gap:12px; scroll-behavior:smooth; min-height:0;
+}
+.messages::-webkit-scrollbar { width:2px; }
+.messages::-webkit-scrollbar-thumb { background:rgba(34,211,238,.2); }
+
+.msg { display:flex; gap:9px; animation:msgIn .35s ease forwards; opacity:0; transform:translateY(8px); }
+@keyframes msgIn { to { opacity:1; transform:translateY(0); } }
+.msg.user { flex-direction:row-reverse; }
+
+.avatar {
+  width:30px; height:30px; border-radius:50%; border:1px solid; flex-shrink:0;
+  display:flex; align-items:center; justify-content:center;
+  font-family:'Orbitron',sans-serif; font-size:8px; font-weight:700;
+}
+.avatar.j { border-color:var(--cyan); color:var(--cyan); background:rgba(34,211,238,.06); box-shadow:0 0 8px rgba(34,211,238,.25); }
+.avatar.u { border-color:var(--gold); color:var(--gold); background:rgba(241,136,33,.06); }
+
+.bubble { max-width:72%; padding:9px 13px; font-size:13.5px; line-height:1.6; letter-spacing:.3px; }
+.msg.j .bubble {
+  background:rgba(34,211,238,.10); border:1px solid rgba(34,211,238,.42);
+  border-left:3px solid var(--cyan); color:var(--text);
+  clip-path:polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 0 100%);
+}
+.msg.user .bubble {
+  background:rgba(241,136,33,.13); border:1px solid rgba(241,136,33,.46);
+  border-right:3px solid var(--orange); color:#fff4df;
+  clip-path:polygon(7px 0, 100% 0, 100% 100%, 0 100%, 0 7px);
+}
+.bname { font-family:'Orbitron',sans-serif; font-size:7.5px; letter-spacing:2px; opacity:.4; margin-bottom:3px; }
+
+/* Typing */
+.typing { display:none; gap:4px; align-items:center; padding:10px 14px 10px 46px; flex-shrink:0; }
+.typing.on { display:flex; }
+.tdot { width:5px; height:5px; border-radius:50%; background:var(--cyan); box-shadow:0 0 5px var(--cyan); animation:td 1.2s ease-in-out infinite; }
+.tdot:nth-child(2){ animation-delay:.18s; }
+.tdot:nth-child(3){ animation-delay:.36s; }
+@keyframes td { 0%,100%{opacity:.25;transform:translateY(0)} 50%{opacity:1;transform:translateY(-4px)} }
+
+/* Sources badge */
+.sources { margin-top:5px; display:flex; gap:4px; flex-wrap:wrap; }
+.src-badge {
+  font-family:'Orbitron',sans-serif; font-size:7px; letter-spacing:1px;
+  padding:2px 7px; border:1px solid rgba(34,211,238,.25);
+  color:rgba(34,211,238,.55); background:rgba(34,211,238,.04);
+}
+
+/* Input */
+.input-zone {
+  padding:10px 14px; border-top:1px solid var(--border);
+  display:flex; gap:9px; align-items:center; background:rgba(1,10,24,.85); flex-shrink:0;
+}
+.input-pre { font-family:'Orbitron',sans-serif; font-size:9px; color:var(--gold); letter-spacing:2px; opacity:.75; white-space:nowrap; }
+.ifield {
+  flex:1; background:transparent; border:none; outline:none;
+  color:#fff4df; font-family:'Share Tech Mono', monospace;
+  font-size:14px; letter-spacing:.8px; caret-color:var(--gold);
+}
+.ifield::placeholder { color:rgba(34,211,238,.2); font-size:11px; letter-spacing:1px; font-style:italic; }
+.send-btn {
+  background:rgba(241,136,33,.12); border:1px solid rgba(241,136,33,.62);
+  color:var(--gold); padding:6px 15px; cursor:pointer;
+  font-family:'Orbitron',sans-serif; font-size:8px; letter-spacing:2px;
+  transition:all .2s;
+  clip-path:polygon(6px 0, 100% 0, 100% calc(100% - 6px), calc(100% - 6px) 100%, 0 100%, 0 6px);
+}
+.send-btn:hover { background:rgba(241,136,33,.22); box-shadow:0 0 18px rgba(241,136,33,.42); }
+
+/* ──────────── WAVE ──────────── */
+.wave { display:flex; align-items:center; justify-content:center; gap:3px; height:36px; }
+.wbar {
+  width:3px; border-radius:2px; background:var(--cyan); box-shadow:0 0 4px var(--cyan);
+  animation:wv 1.3s ease-in-out infinite;
+}
+.wbar:nth-child(1){height:7px;animation-delay:.0s}  .wbar:nth-child(2){height:14px;animation-delay:.1s}
+.wbar:nth-child(3){height:22px;animation-delay:.2s} .wbar:nth-child(4){height:32px;animation-delay:.3s}
+.wbar:nth-child(5){height:26px;animation-delay:.4s} .wbar:nth-child(6){height:17px;animation-delay:.5s}
+.wbar:nth-child(7){height:28px;animation-delay:.6s} .wbar:nth-child(8){height:20px;animation-delay:.7s}
+.wbar:nth-child(9){height:11px;animation-delay:.8s} .wbar:nth-child(10){height:7px;animation-delay:.9s}
+@keyframes wv { 0%,100%{transform:scaleY(.35);opacity:.3} 50%{transform:scaleY(1);opacity:1} }
+
+/* ──────────── FORMS ──────────── */
+.fgroup { display:flex; flex-direction:column; gap:3px; margin-bottom:8px; }
+.fgroup label { font-family:'Orbitron',sans-serif; font-size:7.5px; letter-spacing:2px; color:rgba(34,211,238,.45); }
+.fgroup input, .fgroup select, .fgroup textarea {
+  background:rgba(34,211,238,.08); border:1px solid rgba(34,211,238,.36);
+  color:var(--text); padding:6px 9px; font-family:'Rajdhani',sans-serif;
+  font-size:13px; outline:none; width:100%; transition:border-color .2s;
+}
+.fgroup input:focus, .fgroup select:focus, .fgroup textarea:focus {
+  border-color:var(--cyan); box-shadow:0 0 7px rgba(34,211,238,.2);
+}
+.fgroup select option { background:var(--dark); }
+.fgroup textarea { resize:vertical; min-height:60px; }
+.fbtn {
+  width:100%; background:rgba(34,211,238,.12); border:1px solid var(--cyan);
+  color:var(--text); padding:9px; cursor:pointer;
+  font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:2px;
+  transition:all .2s; text-transform:uppercase;
+}
+.fbtn:hover { background:rgba(34,211,238,.18); box-shadow:var(--glow); }
+.fbtn.danger { border-color:var(--red); color:var(--red); background:rgba(255,61,87,.06); }
+.fbtn.danger:hover { background:rgba(255,61,87,.15); box-shadow:0 0 15px rgba(255,61,87,.4); }
+.fbtn.gold  { border-color:var(--gold); color:var(--gold); background:rgba(241,136,33,.06); }
+.fbtn.gold:hover { background:rgba(241,136,33,.24); box-shadow:0 0 18px rgba(241,136,33,.46); }
+
+/* ──────────── PROGRESS BAR ──────────── */
+.prog-wrap { margin-top:8px; }
+.prog-label { font-family:'Orbitron',sans-serif; font-size:8px; letter-spacing:2px; color:rgba(34,211,238,.5); margin-bottom:4px; display:flex; justify-content:space-between; }
+.prog-bar { height:4px; background:rgba(34,211,238,.1); border-radius:2px; overflow:hidden; }
+.prog-fill { height:100%; background:linear-gradient(90deg,var(--blue),var(--cyan)); box-shadow:0 0 8px var(--cyan); border-radius:2px; transition:width .5s ease; }
+
+/* ──────────── UPLOAD DROP ZONE ──────────── */
+.drop-zone {
+  border:1px dashed rgba(34,211,238,.25); padding:16px; text-align:center;
+  cursor:pointer; transition:all .2s; position:relative;
+}
+.drop-zone:hover, .drop-zone.drag { border-color:var(--cyan); background:rgba(34,211,238,.06); box-shadow:var(--glow); }
+.drop-zone input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+.drop-icon { font-size:22px; margin-bottom:5px; opacity:.6; }
+.drop-text { font-family:'Orbitron',sans-serif; font-size:8px; letter-spacing:2px; color:rgba(34,211,238,.45); }
+
+/* ──────────── DOCUMENT LIST ──────────── */
+.doc-list { display:flex; flex-direction:column; gap:5px; max-height:140px; overflow-y:auto; }
+.doc-list::-webkit-scrollbar { width:2px; }
+.doc-list::-webkit-scrollbar-thumb { background:rgba(34,211,238,.2); }
+.doc-item {
+  padding:6px 9px; border:1px solid rgba(34,211,238,.12);
+  background:rgba(34,211,238,.03); font-size:11px;
+  display:flex; justify-content:space-between; align-items:center;
+  clip-path:polygon(0 0, calc(100% - 5px) 0, 100% 5px, 100% 100%, 0 100%);
+}
+.doc-item .doc-name { color:rgba(34,211,238,.75); flex:1; font-size:10px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.doc-item .doc-stats { font-family:'Orbitron',sans-serif; font-size:7px; color:rgba(34,211,238,.35); flex-shrink:0; margin-left:6px; }
+
+/* ──────────── PROJECT TAGS ──────────── */
+.proj-list { display:flex; flex-direction:column; gap:5px; max-height:150px; overflow-y:auto; }
+.proj-tag {
+  padding:6px 9px; border:1px solid rgba(34,211,238,.12); background:rgba(34,211,238,.03);
+  clip-path:polygon(0 0, calc(100% - 6px) 0, 100% 6px, 100% 100%, 0 100%);
+  display:flex; justify-content:space-between; align-items:center; font-size:11px;
+}
+.proj-tag .pname { color:rgba(34,211,238,.8); }
+.proj-tag .pprio {
+  font-family:'Orbitron',sans-serif; font-size:7px;
+  padding:1px 5px; border:1px solid; border-radius:1px;
+}
+.pprio.ALFA { border-color:var(--red); color:var(--red); }
+.pprio.BETA { border-color:var(--gold); color:var(--gold); }
+.pprio.GAMA { border-color:var(--green); color:var(--green); }
+
+/* ──────────── LOG ──────────── */
+.log-list { display:flex; flex-direction:column; gap:0; max-height:100px; overflow-y:auto; }
+.log-list::-webkit-scrollbar { width:2px; }
+.log-entry { font-size:10px; color:rgba(34,211,238,.42); padding:3px 0; border-bottom:1px solid rgba(34,211,238,.05); }
+.log-t { font-family:'Orbitron',sans-serif; font-size:7.5px; color:rgba(241,136,33,.5); margin-right:5px; }
+
+/* ──────────── TOAST ──────────── */
+.toast {
+  position:fixed; bottom:60px; left:50%; transform:translateX(-50%) translateY(12px);
+  background:rgba(0,20,50,.9); border:1px solid var(--cyan); color:var(--cyan);
+  padding:10px 22px; font-family:'Orbitron',sans-serif; font-size:9px; letter-spacing:2px;
+  opacity:0; transition:all .35s; pointer-events:none; z-index:200;
+  clip-path:polygon(7px 0, 100% 0, 100% calc(100% - 7px), calc(100% - 7px) 100%, 0 100%, 0 7px);
+  box-shadow:0 0 25px rgba(34,211,238,.3); text-align:center;
+}
+.toast.show { opacity:1; transform:translateX(-50%) translateY(0); }
+.toast.gold-t { border-color:var(--gold); color:var(--gold); box-shadow:0 0 25px rgba(241,136,33,.3); }
+
+/* ──────────── CORNERS ──────────── */
+.corner { position:fixed; width:50px; height:50px; pointer-events:none; z-index:50; }
+.corner::before, .corner::after { content:''; position:absolute; background:var(--cyan); box-shadow:0 0 5px var(--cyan); }
+.corner.tl { top:7px; left:7px; }
+.corner.tl::before { top:0; left:0; width:18px; height:1px; }
+.corner.tl::after  { top:0; left:0; width:1px; height:18px; }
+.corner.tr { top:7px; right:7px; }
+.corner.tr::before { top:0; right:0; width:18px; height:1px; }
+.corner.tr::after  { top:0; right:0; width:1px; height:18px; }
+.corner.bl { bottom:7px; left:7px; }
+.corner.bl::before { bottom:0; left:0; width:18px; height:1px; }
+.corner.bl::after  { bottom:0; left:0; width:1px; height:18px; }
+.corner.br { bottom:7px; right:7px; }
+.corner.br::before { bottom:0; right:0; width:18px; height:1px; }
+.corner.br::after  { bottom:0; right:0; width:1px; height:18px; }
+
+/* ──────────── BOTTOM BAR ──────────── */
+.botbar {
+  padding:7px 28px; border-top:1px solid var(--border);
+  display:flex; justify-content:space-between;
+  font-family:'Orbitron',sans-serif; font-size:8px; letter-spacing:2px;
+  color:rgba(34,211,238,.28); background:rgba(1,10,24,.9); flex-shrink:0;
+}
+
+/* ──────────── ENERGY ──────────── */
+.energy-val { text-align:center; }
+.energy-val .ev { font-family:'Orbitron',sans-serif; font-size:26px; font-weight:900; color:var(--cyan); text-shadow:var(--glow-lg); }
+.energy-val .et { font-size:9px; letter-spacing:1px; color:rgba(34,211,238,.4); margin-top:2px; }
+
+/* ──────────── TABS ──────────── */
+.tabs { display:flex; gap:2px; margin-bottom:10px; }
+.tab {
+  flex:1; text-align:center; padding:5px;
+  font-family:'Orbitron',sans-serif; font-size:7px; letter-spacing:1.5px;
+  border:1px solid rgba(34,211,238,.15); cursor:pointer; transition:all .2s; color:rgba(34,211,238,.45);
+}
+.tab.active { border-color:var(--cyan); color:var(--cyan); background:rgba(34,211,238,.08); box-shadow:var(--glow); }
+.tab-content { display:none; }
+.tab-content.active { display:block; }
+
+/* ──────────── VOICE ──────────── */
+.voice-btn {
+  width:36px; height:36px; border-radius:50%; border:2px solid rgba(34,211,238,.3);
+  background:rgba(34,211,238,.06); color:var(--cyan); cursor:pointer;
+  display:flex; align-items:center; justify-content:center; font-size:14px;
+  transition:all .2s; flex-shrink:0;
+}
+.voice-btn:hover { border-color:var(--cyan); box-shadow:var(--glow); }
+.voice-btn.listening { border-color:var(--red); background:rgba(255,61,87,.12);
+  color:var(--red); animation:voice-pulse 1s ease-in-out infinite; }
+.voice-btn.speaking  { border-color:var(--gold); background:rgba(241,136,33,.12);
+  color:var(--gold); }
+@keyframes voice-pulse {
+  0%,100%{ box-shadow:0 0 0 0 rgba(255,61,87,.4); }
+  50%    { box-shadow:0 0 0 8px rgba(255,61,87,0); }
+}
+
+/* ──────────── DOWNLOAD BTN ──────────── */
+.dl-btn {
+  font-family:Orbitron,sans-serif; font-size:7px; letter-spacing:1.5px;
+  padding:3px 8px; border:1px solid rgba(241,136,33,.62); color:var(--gold);
+  background:rgba(241,136,33,.12); cursor:pointer; transition:all .2s;
+}
+.dl-btn:hover { background:rgba(241,136,33,.22); box-shadow:0 0 12px rgba(241,136,33,.42); }
+
+/* ──────────── ANALYTICS PANEL ──────────── */
+.analytics-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; margin-bottom:10px; }
+.stat-box {
+  padding:8px; border:1px solid var(--border); background:rgba(34,211,238,.03);
+  text-align:center;
+}
+.stat-box .sv { font-family:Orbitron,sans-serif; font-size:18px; font-weight:700;
+  color:var(--cyan); text-shadow:0 0 8px var(--cyan); }
+.stat-box .sl { font-family:Orbitron,sans-serif; font-size:7px; letter-spacing:2px;
+  color:rgba(34,211,238,.4); margin-top:2px; }
+#cur-topics-cloud { max-height:120px; overflow-y:auto; overflow-x:hidden; align-content:flex-start; padding-right:2px; }
+#cur-topics-cloud span { max-width:100%; white-space:normal; overflow-wrap:anywhere; line-height:1.45; }
+#cur-insights-list { overflow-x:hidden; }
+#cur-insights-list > div { max-width:100%; min-width:0; overflow:hidden; overflow-wrap:anywhere; }
+#cur-insights-list * { max-width:100%; }
+
+</style>
+<script>
+class Chart {
+  constructor(ctx, config) {
+    this.ctx = ctx;
+    this.type = config.type || 'line';
+    this.data = config.data || { labels: [], datasets: [] };
+    this.options = config.options || {};
+    this.update();
+  }
+
+  update() {
+    const ctx = this.ctx;
+    const canvas = ctx.canvas;
+    const rect = canvas.getBoundingClientRect();
+    const dpr = window.devicePixelRatio || 1;
+    const width = Math.max(120, rect.width || canvas.width || 220);
+    const height = Math.max(90, rect.height || canvas.height || 120);
+    canvas.width = Math.round(width * dpr);
+    canvas.height = Math.round(height * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.clearRect(0, 0, width, height);
+
+    const area = { left: 30, right: width - 10, top: 12, bottom: height - 20 };
+    this._grid(area);
+    if (this.type === 'bar') this._bars(area);
+    else this._lines(area);
+  }
+
+  _grid(area) {
+    const ctx = this.ctx;
+    ctx.save();
+    ctx.strokeStyle = 'rgba(34,211,238,.09)';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+      const y = area.top + (area.bottom - area.top) * i / 4;
+      ctx.beginPath();
+      ctx.moveTo(area.left, y);
+      ctx.lineTo(area.right, y);
+      ctx.stroke();
+    }
+    ctx.restore();
+  }
+
+  _range() {
+    const yOpts = this.options?.scales?.y || {};
+    const values = this.data.datasets.flatMap(ds => ds.data || []).map(Number);
+    const maxData = Math.max(1, ...values.filter(Number.isFinite));
+    return {
+      min: Number.isFinite(yOpts.min) ? yOpts.min : 0,
+      max: Number.isFinite(yOpts.max) ? yOpts.max : Math.ceil(maxData),
+    };
+  }
+
+  _point(value, index, count, area, range) {
+    const span = Math.max(1, count - 1);
+    const x = area.left + (area.right - area.left) * index / span;
+    const clamped = Math.max(range.min, Math.min(range.max, Number(value) || 0));
+    const y = area.bottom - (area.bottom - area.top) * (clamped - range.min) / Math.max(1, range.max - range.min);
+    return { x, y };
+  }
+
+  _lines(area) {
+    const ctx = this.ctx;
+    const labels = this.data.labels || [];
+    const range = this._range();
+    this.data.datasets.forEach(ds => {
+      const data = ds.data || [];
+      if (!data.length) return;
+      ctx.save();
+      ctx.strokeStyle = ds.borderColor || '#22d3ee';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      data.forEach((value, index) => {
+        const p = this._point(value, index, data.length, area, range);
+        if (index === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      });
+      ctx.stroke();
+      if (ds.fill) {
+        const last = this._point(data[data.length - 1], data.length - 1, data.length, area, range);
+        ctx.lineTo(last.x, area.bottom);
+        ctx.lineTo(area.left, area.bottom);
+        ctx.closePath();
+        ctx.fillStyle = ds.backgroundColor || 'rgba(34,211,238,.08)';
+        ctx.fill();
+      }
+      ctx.restore();
+    });
+
+    if (labels.length) this._labels(labels, area);
+  }
+
+  _bars(area) {
+    const ctx = this.ctx;
+    const dataset = this.data.datasets[0] || { data: [] };
+    const data = dataset.data || [];
+    const range = this._range();
+    const gap = 4;
+    const barWidth = Math.max(3, (area.right - area.left) / Math.max(1, data.length) - gap);
+    ctx.save();
+    ctx.fillStyle = dataset.backgroundColor || 'rgba(241,136,33,.42)';
+    ctx.strokeStyle = dataset.borderColor || '#f18821';
+    data.forEach((value, index) => {
+      const p = this._point(value, index, data.length, area, range);
+      const x = area.left + index * ((area.right - area.left) / Math.max(1, data.length)) + gap / 2;
+      const h = area.bottom - p.y;
+      ctx.fillRect(x, p.y, barWidth, h);
+      ctx.strokeRect(x, p.y, barWidth, h);
+    });
+    ctx.restore();
+    this._labels(this.data.labels || [], area);
+  }
+
+  _labels(labels, area) {
+    const ctx = this.ctx;
+    const maxTicks = this.options?.scales?.x?.ticks?.maxTicksLimit || 6;
+    const step = Math.max(1, Math.ceil(labels.length / maxTicks));
+    ctx.save();
+    ctx.fillStyle = 'rgba(219,234,254,.62)';
+    ctx.font = '8px Segoe UI, sans-serif';
+    labels.forEach((label, index) => {
+      if (index % step !== 0) return;
+      const x = area.left + (area.right - area.left) * index / Math.max(1, labels.length - 1);
+      ctx.fillText(String(label).slice(0, 8), x - 8, area.bottom + 14);
+    });
+    ctx.restore();
+  }
+}
+window.Chart = Chart;
+</script>
+</head>
+<body>
+
+<!-- Corner decorations -->
+<div class="corner tl"></div><div class="corner tr"></div>
+<div class="corner bl"></div><div class="corner br"></div>
+<div class="toast" id="toast"></div>
+
+<div class="hud">
+
+<!-- ──── TOP BAR ──── -->
+<div class="topbar">
+  <div class="logo">J.A.R.V.I.S</div>
+
+  <div class="topbar-center">
+    <div class="status-pill online" id="conn-status">
+      <span class="blink"></span>CONECTADO
+    </div>
+    <div class="status-pill" id="model-status" style="border-color:rgba(34,211,238,.3);color:rgba(34,211,238,.5)">
+      <span class="blink" style="background:rgba(34,211,238,.5);box-shadow:0 0 5px rgba(34,211,238,.5)"></span>
+      MODELO: AGUARDANDO
+    </div>
+  </div>
+
+  <div class="clock" id="clock">--:--:--</div>
+</div>
+
+<!-- ──── MAIN ──── -->
+<div class="main">
+
+<!-- ── LEFT ── -->
+<div class="left">
+
+  <!-- Radar -->
+  <div class="panel">
+    <div class="plabel">▸ Sensor Array</div>
+    <div class="radar">
+      <svg viewBox="0 0 128 128">
+        <circle class="r-ring" cx="64" cy="64" r="55"/>
+        <circle class="r-ring" cx="64" cy="64" r="40"/>
+        <circle class="r-ring" cx="64" cy="64" r="25"/>
+        <line stroke="rgba(34,211,238,.12)" stroke-width="1" x1="9" y1="64" x2="119" y2="64"/>
+        <line stroke="rgba(34,211,238,.12)" stroke-width="1" x1="64" y1="9" x2="64" y2="119"/>
+        <g class="r-sweep">
+          <path d="M64,64 L64,9 A55,55 0 0,1 119,64 Z" fill="url(#sg)" opacity=".35"/>
+        </g>
+        <circle class="r-dot" cx="80" cy="40" r="3"/>
+        <circle class="r-dot" cx="44" cy="76" r="2.5" style="animation-delay:.7s"/>
+        <circle class="r-dot" cx="88" cy="82" r="2" style="animation-delay:1.4s"/>
+        <defs>
+          <radialGradient id="sg" cx="64" cy="64" r="55" gradientUnits="userSpaceOnUse">
+            <stop offset="0%" stop-color="rgba(34,211,238,.7)"/>
+            <stop offset="100%" stop-color="rgba(34,211,238,0)"/>
+          </radialGradient>
+        </defs>
+      </svg>
+    </div>
+  </div>
+
+  <!-- CPU / RAM / DISK -->
+  <div class="panel">
+    <div class="plabel">▸ Hardware Monitor</div>
+    <div class="m-row"><span class="m-label">CPU</span><span class="m-val" id="cpu-val">--%</span></div>
+    <div class="m-bar"><div class="m-fill" id="cpu-bar" style="width:0%"></div></div>
+    <div class="m-row"><span class="m-label">RAM</span><span class="m-val" id="ram-val">--%</span></div>
+    <div class="m-bar"><div class="m-fill" id="ram-bar" style="width:0%"></div></div>
+    <div class="m-row"><span class="m-label">DISCO</span><span class="m-val" id="disk-val">--%</span></div>
+    <div class="m-bar"><div class="m-fill" id="disk-bar" style="width:0%"></div></div>
+    <div class="m-row" style="margin-top:6px"><span class="m-label">REDE ↑</span><span class="m-val" id="net-val" style="font-size:9px">-- MB</span></div>
+    <div class="m-row"><span class="m-label">TEMP</span><span class="m-val" id="temp-val" style="font-size:9px">--°C</span></div>
+  </div>
+
+  <!-- System Log -->
+  <div class="panel">
+    <div class="plabel">▸ Log do Sistema</div>
+    <div class="log-list" id="sys-log"></div>
+  </div>
+
+  <!-- Projects list -->
+  <div class="panel" id="proj-panel" style="display:none">
+    <div class="plabel">▸ Projetos Registrados</div>
+    <div class="proj-list" id="proj-list"></div>
+  </div>
+
+</div>
+
+<!-- ── CENTER ── -->
+<div class="center">
+
+  <!-- Arc Reactor -->
+  <div class="arc-zone">
+    <div class="arc">
+      <svg viewBox="0 0 100 100">
+        <circle class="arc-ring1" cx="50" cy="50" r="44"/>
+        <polygon points="50,18 82,68 18,68" fill="none" stroke="rgba(34,211,238,.1)" stroke-width="1"/>
+        <polygon points="50,82 82,32 18,32" fill="none" stroke="rgba(27,75,107,.1)" stroke-width="1"/>
+        <circle class="arc-ring2" cx="50" cy="50" r="32"/>
+        <circle class="arc-ring3" cx="50" cy="50" r="20" stroke-dasharray="3 2.5"/>
+        <circle class="arc-core" cx="50" cy="50" r="9"/>
+        <circle cx="50" cy="50" r="5" fill="white" opacity=".88"/>
+      </svg>
+    </div>
+    <div class="arc-label">STARK TECH v4.1 — REATOR ARC</div>
+  </div>
+
+  <!-- Chat Window -->
+  <div class="chat-wrap">
+    <div class="chat-hdr">
+      <span>▸ INTERFACE DE COMUNICAÇÃO SEGURA</span>
+      <span id="msg-count">0 MSG</span>
+    </div>
+    <div class="messages" id="messages">
+      <div class="msg j">
+        <div class="avatar j">AI</div>
+        <div>
+          <div class="bname">J.A.R.V.I.S</div>
+          <div class="bubble">Sistemas online. Aguardando instruções, Senhor. Para começar, faça upload de documentos PDF para me treinar.</div>
+        </div>
+      </div>
+    </div>
+    <div class="typing" id="typing">
+      <div class="tdot"></div><div class="tdot"></div><div class="tdot"></div>
+    </div>
+    <div class="input-zone">
+      <span class="input-pre">» SR. STARK</span>
+      <input class="ifield" id="ifield" type="text" placeholder="Digite sua mensagem…" autocomplete="off"/>
+      <button class="voice-btn" id="voice-btn" onclick="toggleVoiceInput()" title="Falar com JARVIS">🎤</button>
+      <button class="send-btn" onclick="sendMsg()">ENVIAR</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ── RIGHT ── -->
+<div class="right">
+
+  <!-- Voice viz -->
+  <div class="panel">
+    <div class="plabel">▸ Canal de Voz</div>
+    <div class="wave">
+      <div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div>
+      <div class="wbar"></div><div class="wbar"></div><div class="wbar"></div><div class="wbar"></div>
+      <div class="wbar"></div><div class="wbar"></div>
+    </div>
+    <div style="text-align:center;font-family:'Orbitron',sans-serif;font-size:7.5px;letter-spacing:2px;color:rgba(34,211,238,.35);margin-top:5px">LINHA SEGURA ATIVA</div>
+  </div>
+
+  <!-- Tabs: PDF / Treinar / Projeto -->
+  <div class="panel" style="flex:1">
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab('docs')" id="tab-docs">DOCS</div>
+      <div class="tab" onclick="switchTab('train')" id="tab-train">TREINAR</div>
+      <div class="tab" onclick="switchTab('project')" id="tab-project">PROJETO</div>
+      <div class="tab" onclick="switchTab('curiosity')" id="tab-curiosity" style="border-color:rgba(241,136,33,.28);color:rgba(241,136,33,.72)">⬡ IA</div>
+      <div class="tab" onclick="switchTab('analytics')" id="tab-analytics" style="border-color:rgba(241,136,33,.2);color:rgba(241,136,33,.5)">📊</div>
+    </div>
+
+    <!-- DOCS TAB -->
+    <div class="tab-content active" id="tc-docs">
+      <div class="drop-zone" id="drop-zone"
+           ondragover="ev.preventDefault();this.classList.add('drag')"
+           ondragleave="this.classList.remove('drag')"
+           ondrop="handleDrop(event)">
+        <input type="file" accept=".pdf" multiple onchange="handleFiles(this.files)" id="file-input"/>
+        <div class="drop-icon">📄</div>
+        <div class="drop-text">ARRASTE PDFs AQUI<br>OU CLIQUE PARA SELECIONAR</div>
+      </div>
+      <div id="upload-progress" style="display:none;margin-top:8px">
+        <div class="prog-wrap">
+          <div class="prog-label"><span>PROCESSANDO</span><span id="uprog-pct">0%</span></div>
+          <div class="prog-bar"><div class="prog-fill" id="uprog-fill" style="width:0%"></div></div>
+        </div>
+      </div>
+      <div style="margin-top:10px">
+        <div class="plabel">▸ Documentos Indexados</div>
+        <div class="doc-list" id="doc-list">
+          <div style="font-size:10px;color:rgba(34,211,238,.3);text-align:center;padding:8px">Nenhum documento ainda</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TRAIN TAB -->
+    <div class="tab-content" id="tc-train">
+      <div style="font-size:11px;color:rgba(34,211,238,.6);margin-bottom:10px;line-height:1.6">
+        O modelo Transformer será treinado do zero com os documentos carregados.
+        Rede neural com atenção multi-cabeça, BPE tokenizer e geração autoregressiva.
+      </div>
+      <div class="prog-wrap" id="train-prog-wrap" style="display:none">
+        <div class="prog-label">
+          <span>TREINANDO</span>
+          <span id="train-pct">0%</span>
+        </div>
+        <div class="prog-bar"><div class="prog-fill" id="train-fill" style="width:0%"></div></div>
+        <div style="margin-top:5px;font-family:'Orbitron',sans-serif;font-size:8px;color:rgba(34,211,238,.4)" id="train-info">Aguardando...</div>
+      </div>
+      <div id="train-log" style="max-height:120px;overflow-y:auto;margin:8px 0;font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(34,211,238,.5);background:rgba(34,211,238,.03);padding:6px;border:1px solid rgba(34,211,238,.08)"></div>
+      <button class="fbtn gold" onclick="startTraining()" id="train-btn">⬡ INICIAR TREINAMENTO NEURAL</button>
+      <div id="train-status" style="margin-top:8px;font-size:10px;color:rgba(34,211,238,.45)">
+        Aguardando documentos...
+      </div>
+    </div>
+
+    <!-- PROJECT TAB -->
+    <div class="tab-content" id="tc-project">
+      <div class="fgroup">
+        <label>Nome do Projeto</label>
+        <input type="text" id="pj-name" placeholder="Ex: Iron Man MK-50"/>
+      </div>
+      <div class="fgroup">
+        <label>Tipo / Categoria</label>
+        <select id="pj-type">
+          <option value="">Selecione...</option>
+          <option>Armamento</option>
+          <option>Energia</option>
+          <option>Software / IA</option>
+          <option>Biotecnologia</option>
+          <option>Infraestrutura</option>
+          <option>Pesquisa</option>
+          <option>Outro</option>
+        </select>
+      </div>
+      <div class="fgroup">
+        <label>Prioridade</label>
+        <select id="pj-priority">
+          <option value="ALFA">🔴 ALFA — Crítica</option>
+          <option value="BETA" selected>🟡 BETA — Alta</option>
+          <option value="GAMA">🟢 GAMA — Normal</option>
+        </select>
+      </div>
+      <div class="fgroup">
+        <label>Descrição</label>
+        <textarea id="pj-desc" placeholder="Descreva o projeto..."></textarea>
+      </div>
+      <button class="fbtn" onclick="saveProject()">⬡ REGISTRAR PROJETO</button>
+    </div>
+
+    <!-- CURIOSITY TAB -->
+    <div class="tab-content" id="tc-curiosity">
+      <div class="analytics-grid">
+        <div class="stat-box"><div class="sv" id="cur-total">0</div><div class="sl">INSIGHTS</div></div>
+        <div class="stat-box"><div class="sv" id="cur-topics">0</div><div class="sl">TOPICOS</div></div>
+        <div class="stat-box"><div class="sv" id="cur-cycles">0</div><div class="sl">CICLOS</div></div>
+        <div class="stat-box"><div class="sv">TAU</div><div class="sl">CURIOSIDADE</div></div>
+      </div>
+      <div class="fgroup">
+        <label>Busca de Insights</label>
+        <input type="text" id="cur-search" placeholder="termo, documento ou conceito" onkeydown="if(event.key==='Enter')searchInsights()"/>
+      </div>
+      <button class="fbtn gold" onclick="searchInsights()" style="margin-bottom:8px;font-size:8px">BUSCAR INSIGHTS</button>
+      <button class="fbtn" onclick="surfaceRandomInsight()" style="margin-bottom:8px;font-size:8px">INSIGHT ALEATORIO</button>
+      <div class="plabel">▸ Topicos</div>
+      <div id="cur-topics-cloud" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px"></div>
+      <div class="plabel">▸ Descobertas</div>
+      <div id="cur-insights-list" style="display:flex;flex-direction:column;gap:6px;max-height:230px;overflow-y:auto;overflow-x:hidden"></div>
+    </div>
+
+    <!-- ANALYTICS TAB -->
+    <div class="tab-content" id="tc-analytics">
+      <div class="analytics-grid" id="analytics-stats">
+        <div class="stat-box"><div class="sv" id="an-msgs">0</div><div class="sl">MSGS</div></div>
+        <div class="stat-box"><div class="sv" id="an-docs">0</div><div class="sl">DOCS</div></div>
+        <div class="stat-box"><div class="sv" id="an-ins">0</div><div class="sl">INSIGHTS</div></div>
+        <div class="stat-box"><div class="sv" id="an-proj">0</div><div class="sl">PROJETOS</div></div>
+      </div>
+
+      <!-- CPU history chart -->
+      <div class="plabel">▸ CPU / RAM — Últimos 30 min</div>
+      <canvas id="metrics-chart" height="90" style="width:100%;margin-bottom:10px"></canvas>
+
+      <!-- Curiosity timeline chart -->
+      <div class="plabel">▸ Ciclos de Curiosidade</div>
+      <canvas id="curiosity-chart" height="70" style="width:100%;margin-bottom:10px"></canvas>
+
+      <!-- Training history -->
+      <div class="plabel">▸ Histórico de Treinos</div>
+      <div id="train-hist-list" style="display:flex;flex-direction:column;gap:4px;max-height:80px;overflow-y:auto"></div>
+
+      <button class="fbtn gold" onclick="loadAnalytics()" style="margin-top:10px;font-size:8px">
+        ↺ ATUALIZAR DADOS
+      </button>
+    </div>
+  </div>
+
+
+  <!-- Energy -->
+  <div class="panel">
+    <div class="plabel">▸ Reator Arc</div>
+    <div class="energy-val">
+      <div class="ev" id="energy-val">--%</div>
+      <div class="et">REATOR ARC — ESTÁVEL</div>
+    </div>
+    <div class="m-bar" style="margin-top:8px">
+      <div class="m-fill" id="energy-bar" style="width:0%;background:linear-gradient(90deg,#1b4b6b,#22d3ee)"></div>
+    </div>
+  </div>
+
+</div>
+</div><!-- /main -->
+
+<!-- BOTTOM BAR -->
+<div class="botbar">
+  <span>STARK INDUSTRIES © 3000</span>
+  <span id="session-info">SESSÃO ATIVA — 0 EVENTOS</span>
+  <span id="sys-platform">PLATAFORMA: --</span>
+</div>
+
+</div><!-- /hud -->
+
+<script>
+// ─── Config ───────────────────────────────────────────────────────────────────
+const API = '';   // same origin — change to 'http://localhost:8000' if needed
+const WS_URL = `ws://${location.host}/ws`;
+
+// ─── State ────────────────────────────────────────────────────────────────────
+let msgCount = 0, eventCount = 0;
+let ws = null;
+let documents = [];
+
+// ─── Clock ────────────────────────────────────────────────────────────────────
+function tick() {
+  document.getElementById('clock').textContent =
+    new Date().toLocaleTimeString('pt-BR', { hour12: false });
+}
+setInterval(tick, 1000); tick();
+
+// ─── WebSocket ────────────────────────────────────────────────────────────────
+function connectWS() {
+  try {
+    ws = new WebSocket(WS_URL);
+    ws.onopen    = () => { setConnStatus(true); addLog('WebSocket conectado'); };
+    ws.onclose   = () => { setConnStatus(false); setTimeout(connectWS, 3000); };
+    ws.onerror   = () => setConnStatus(false);
+    ws.onmessage = (e) => handleWS(JSON.parse(e.data));
+  } catch (ex) {
+    setConnStatus(false);
+    setTimeout(connectWS, 3000);
+  }
+}
+connectWS();
+
+function handleWS(msg) {
+  if (msg.type === 'metrics')       updateMetrics(msg.data);
+  if (msg.type === 'init')          handleInit(msg.data);
+  if (msg.type === 'train_progress') updateTrainProgress(msg.data);
+  if (msg.type === 'pdf_processed') {
+    showToast(`✦ ${msg.message}`);
+    addLog(msg.message);
+    loadDocuments();
+  }
+  if (msg.type === 'curiosity_insight') {
+    handleNewInsight(msg.insight);
+  }
+}
+
+function handleInit(data) {
+  if (data.is_trained)  setModelStatus('trained');
+  if (data.is_training) setModelStatus('training');
+  if (data.projects)    data.projects.forEach(addProjectTag);
+}
+
+// ─── Metrics Update ───────────────────────────────────────────────────────────
+function updateMetrics(data) {
+  if (!data) return;
+  const cpu  = data.cpu  || {};
+  const mem  = data.memory || {};
+  const disk = data.disk || {};
+  const net  = data.network || {};
+
+  setBar('cpu-val',  'cpu-bar',  cpu.percent);
+  setBar('ram-val',  'ram-bar',  mem.percent);
+  setBar('disk-val', 'disk-bar', disk.percent);
+
+  document.getElementById('net-val').textContent  = (net.bytes_sent_mb || 0) + ' MB';
+  document.getElementById('temp-val').textContent = cpu.temperature ? cpu.temperature + '°C' : 'N/A';
+
+  const energy = 90 + Math.round(Math.random() * 8);
+  document.getElementById('energy-val').textContent = energy + '%';
+  document.getElementById('energy-bar').style.width  = energy + '%';
+
+  document.getElementById('sys-platform').textContent = 'PLATAFORMA: ' + (data.platform || '--');
+}
+
+function setBar(valId, barId, pct) {
+  if (pct === undefined || pct === null) return;
+  document.getElementById(valId).textContent = pct + '%';
+  const bar = document.getElementById(barId);
+  bar.style.width = pct + '%';
+  bar.className = 'm-fill' + (pct > 90 ? ' crit' : pct > 75 ? ' warn' : '');
+}
+
+// ─── Status Pills ─────────────────────────────────────────────────────────────
+function setConnStatus(online) {
+  const el = document.getElementById('conn-status');
+  el.className = 'status-pill ' + (online ? 'online' : 'offline');
+  el.innerHTML = `<span class="blink"></span>${online ? 'CONECTADO' : 'DESCONECTADO'}`;
+}
+
+function setModelStatus(state) {
+  const el = document.getElementById('model-status');
+  const map = {
+    'trained':  ['online',   'MODELO: ATIVO'],
+    'training': ['training', 'MODELO: TREINANDO'],
+    'waiting':  ['offline',  'MODELO: AGUARDANDO'],
+  };
+  const [cls, txt] = map[state] || map['waiting'];
+  el.className = 'status-pill ' + cls;
+  el.innerHTML = `<span class="blink"></span>${txt}`;
+}
+
+// ─── Chat ─────────────────────────────────────────────────────────────────────
+async function sendMsg() {
+  const field = document.getElementById('ifield');
+  const text  = field.value.trim();
+  if (!text) return;
+  field.value = '';
+
+  addMessage(text, 'user');
+
+  const typing = document.getElementById('typing');
+  typing.classList.add('on');
+  scrollChat();
+
+  try {
+    const res  = await fetch(API + '/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: text }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      throw new Error(data.detail || data.message || 'Falha HTTP ' + res.status);
+    }
+    typing.classList.remove('on');
+    const answer = data.answer ?? data.text ?? data.response ?? data.message ?? data.detail;
+    const sources = data.sources ?? data.data?.sources ?? [];
+    addMessage(answer || 'Resposta local recebida sem conteúdo textual.', 'jarvis', sources);
+
+    // Handle actions
+    if (data.action === 'open_project_form') switchTab('project');
+    if (data.action === 'show_train_panel')  switchTab('train');
+    if (data.action === 'show_curiosity')    switchTab('curiosity');
+    if (data.action === 'show_cluster')      switchTab('analytics');
+    if (data.action === 'update_metrics' && data.data) updateMetrics(data.data);
+  } catch (e) {
+    typing.classList.remove('on');
+    addMessage('Falha de comunicação, Senhor. Verifique o servidor Python.', 'jarvis');
+  }
+}
+
+function addMessage(text, role, sources) {
+  text = String(text ?? 'Resposta local sem conteúdo.');
+  const box = document.getElementById('messages');
+  const div = document.createElement('div');
+  div.className = `msg ${role === 'jarvis' ? 'j' : 'user'}`;
+
+  const avatar  = role === 'jarvis' ? 'AI' : 'TS';
+  const aClass  = role === 'jarvis' ? 'j' : 'u';
+  const bname   = role === 'jarvis' ? 'J.A.R.V.I.S' : 'SR. STARK';
+
+  let sourcesHtml = '';
+  if (sources && sources.length > 0) {
+    sourcesHtml = `<div class="sources">${sources.map(s =>
+      `<span class="src-badge">📄 ${s.source} (${(s.score*100).toFixed(0)}%)</span>`
+    ).join('')}</div>`;
+  }
+
+  div.innerHTML = `
+    <div class="avatar ${aClass}">${avatar}</div>
+    <div>
+      <div class="bname">${bname}</div>
+      <div class="bubble">${text}${sourcesHtml}</div>
+    </div>`;
+
+  box.appendChild(div);
+  scrollChat();
+  msgCount++;
+  eventCount++;
+  document.getElementById('msg-count').textContent = msgCount + ' MSG';
+  document.getElementById('session-info').textContent = `SESSÃO ATIVA — ${eventCount} EVENTOS`;
+  addLog(role === 'jarvis' ? 'Resposta JARVIS enviada' : 'Entrada do usuário');
+}
+
+function scrollChat() {
+  const box = document.getElementById('messages');
+  box.scrollTop = box.scrollHeight;
+}
+
+document.getElementById('ifield').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendMsg();
+});
+
+// ─── PDF Upload ───────────────────────────────────────────────────────────────
+function handleDrop(ev) {
+  ev.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag');
+  const files = ev.dataTransfer.files;
+  handleFiles(files);
+}
+
+function handleFiles(files) {
+  const pdfs = Array.from(files).filter(f => f.name.toLowerCase().endsWith('.pdf'));
+  if (!pdfs.length) { showToast('⚠ Apenas arquivos PDF são aceitos'); return; }
+  pdfs.forEach(uploadPDF);
+}
+
+async function uploadPDF(file) {
+  showToast(`⬡ Carregando: ${file.name}`);
+  const prog = document.getElementById('upload-progress');
+  const fill = document.getElementById('uprog-fill');
+  const pct  = document.getElementById('uprog-pct');
+  prog.style.display = 'block';
+  fill.style.width = '10%'; pct.textContent = '10%';
+
+  const fd = new FormData();
+  fd.append('file', file);
+  fill.style.width = '40%'; pct.textContent = '40%';
+
+  try {
+    const res  = await fetch(API + '/api/pdf/upload', { method:'POST', body:fd });
+    const data = await res.json();
+    fill.style.width = '100%'; pct.textContent = '100%';
+
+    if (data.success) {
+      addMessage(
+        `Documento <strong>${file.name}</strong> processado com sucesso, Senhor. ` +
+        `${data.pages} páginas, ${data.words?.toLocaleString()} palavras, ` +
+        `${data.tables} tabelas, ${data.images} imagens extraídas.`,
+        'jarvis'
+      );
+      loadDocuments();
+    }
+  } catch (e) {
+    showToast('⚠ Erro ao processar PDF. Verifique o servidor.');
+  }
+  setTimeout(() => { prog.style.display='none'; fill.style.width='0%'; }, 1500);
+}
+
+async function loadDocuments() {
+  try {
+    const res  = await fetch(API + '/api/documents');
+    const data = await res.json();
+    documents = data.documents || [];
+    renderDocList();
+    checkTrainReady();
+  } catch(e) {}
+}
+
+function renderDocList() {
+  const el = document.getElementById('doc-list');
+  if (documents.length === 0) {
+    el.innerHTML = '<div style="font-size:10px;color:rgba(34,211,238,.3);text-align:center;padding:8px">Nenhum documento ainda</div>';
+    return;
+  }
+  el.innerHTML = documents.map(d => `
+    <div class="doc-item">
+      <span class="doc-name" title="${d.filename}">${d.filename}</span>
+      <span class="doc-stats">${d.pages}p · ${(d.words||0).toLocaleString()}w</span>
+    </div>`).join('');
+}
+
+function checkTrainReady() {
+  const status = document.getElementById('train-status');
+  if (documents.length > 0) {
+    status.textContent = `✓ ${documents.length} documento(s) prontos para treinamento.`;
+  } else {
+    status.textContent = 'Aguardando documentos...';
+  }
+}
+
+// ─── Training ─────────────────────────────────────────────────────────────────
+async function startTraining() {
+  if (documents.length === 0) {
+    showToast('⚠ Faça upload de PDFs primeiro'); return;
+  }
+
+  const btn = document.getElementById('train-btn');
+  btn.disabled = true; btn.textContent = '⏳ TREINANDO...';
+  document.getElementById('train-prog-wrap').style.display = 'block';
+  setModelStatus('training');
+  addMessage('Iniciando treinamento do modelo neural Transformer do zero, Senhor. Aguarde...', 'jarvis');
+  addLog('Treinamento neural iniciado');
+
+  try {
+    await fetch(API + '/api/train/start', { method:'POST' });
+  } catch(e) {
+    showToast('⚠ Erro ao iniciar treinamento'); btn.disabled=false;
+  }
+}
+
+function updateTrainProgress(data) {
+  const log  = document.getElementById('train-log');
+  const fill = document.getElementById('train-fill');
+  const pct  = document.getElementById('train-pct');
+  const info = document.getElementById('train-info');
+  const btn  = document.getElementById('train-btn');
+
+  if (data.error) {
+    log.innerHTML += `<div style="color:var(--red)">ERRO: ${data.error}</div>`;
+    btn.disabled = false; btn.textContent = '⬡ INICIAR TREINAMENTO NEURAL';
+    setModelStatus('waiting');
+    return;
+  }
+
+  if (data.done) {
+    fill.style.width = '100%'; pct.textContent = '100%';
+    info.textContent = 'TREINAMENTO CONCLUÍDO';
+    btn.disabled = false; btn.textContent = '✓ MODELO TREINADO';
+    setModelStatus('trained');
+    showToast('✦ MODELO NEURAL TREINADO COM SUCESSO');
+    addMessage('Treinamento concluído, Senhor. O modelo neural está ativo e pronto para responder com base nos documentos carregados.', 'jarvis');
+    loadDocuments();
+    return;
+  }
+
+  if (data.step !== undefined) {
+    const p = data.progress || 0;
+    fill.style.width = p + '%'; pct.textContent = p + '%';
+    info.textContent = `Step: ${data.step} | Loss: ${data.loss || '--'} | LR: ${data.lr || '--'}`;
+    log.innerHTML += `<div>step ${data.step} | loss ${data.loss}</div>`;
+    log.scrollTop = log.scrollHeight;
+  }
+  if (data.val_loss !== undefined) {
+    log.innerHTML += `<div style="color:var(--gold)">▸ val_loss: ${data.val_loss}</div>`;
+    log.scrollTop = log.scrollHeight;
+  }
+}
+
+// ─── Projects ─────────────────────────────────────────────────────────────────
+async function saveProject() {
+  const name = document.getElementById('pj-name').value.trim();
+  const type = document.getElementById('pj-type').value;
+  const prio = document.getElementById('pj-priority').value;
+  const desc = document.getElementById('pj-desc').value.trim();
+
+  if (!name || !type) { showToast('⚠ Preencha Nome e Tipo'); return; }
+
+  try {
+    const res = await fetch(API + '/api/project/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, type, priority: prio, description: desc, tags: [] }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      addProjectTag(data.project);
+      addMessage(
+        `Projeto <strong>${name}</strong> registrado nos arquivos da Stark Industries, Senhor. ` +
+        `Prioridade ${prio}. Recursos alocados.`,
+        'jarvis'
+      );
+      showToast(`✦ PROJETO "${name.toUpperCase()}" REGISTRADO`);
+      // Clear form
+      ['pj-name','pj-desc'].forEach(id => document.getElementById(id).value = '');
+      document.getElementById('pj-type').value = '';
+    }
+  } catch(e) { showToast('⚠ Erro ao salvar projeto'); }
+}
+
+function addProjectTag(proj) {
+  const panel = document.getElementById('proj-panel');
+  const list  = document.getElementById('proj-list');
+  panel.style.display = 'block';
+  const div = document.createElement('div');
+  div.className = 'proj-tag';
+  div.innerHTML = `<span class="pname">${proj.name}</span><span class="pprio ${proj.priority}">${proj.priority}</span>`;
+  list.appendChild(div);
+}
+
+// ─── Tabs ─────────────────────────────────────────────────────────────────────
+function switchTab(id) {
+  ['docs','train','project','curiosity','analytics'].forEach(t => {
+    document.getElementById('tab-'+t).classList.toggle('active', t===id);
+    document.getElementById('tc-'+t).classList.toggle('active', t===id);
+  });
+  if (id === 'curiosity') loadCuriosityData();
+  if (id === 'analytics') loadAnalytics();
+}
+
+// ─── Syslog ───────────────────────────────────────────────────────────────────
+const autoLogs = ['Varredura OK','Firewall atualizado','Criptografia ativa','Backup realizado','Satélite sync'];
+function addLog(msg) {
+  const el  = document.getElementById('sys-log');
+  const now = new Date().toLocaleTimeString('pt-BR',{hour12:false,hour:'2-digit',minute:'2-digit'});
+  const row = document.createElement('div');
+  row.className = 'log-entry';
+  row.innerHTML = `<span class="log-t">${now}</span>${msg}`;
+  el.appendChild(row);
+  while (el.children.length > 8) el.removeChild(el.firstChild);
+  el.scrollTop = el.scrollHeight;
+  eventCount++;
+  document.getElementById('session-info').textContent = `SESSÃO ATIVA — ${eventCount} EVENTOS`;
+}
+setInterval(() => addLog(autoLogs[Math.floor(Math.random()*autoLogs.length)]), 7000);
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+function showToast(msg, gold=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (gold ? ' gold-t' : '');
+  setTimeout(() => t.className = 'toast', 3500);
+}
+
+
+// ─── Curiosity Engine ─────────────────────────────────────────────────────────
+let _insights = [];
+let _topics   = {};
+
+async function loadCuriosityData() {
+  try {
+    const [statsRes, insRes, topicsRes] = await Promise.all([
+      fetch(API + '/api/curiosity/stats'),
+      fetch(API + '/api/curiosity/insights?n=30'),
+      fetch(API + '/api/curiosity/topics'),
+    ]);
+    const stats   = await statsRes.json();
+    const insData = await insRes.json();
+    const topData = await topicsRes.json();
+
+    _insights = insData.insights || [];
+    _topics   = topData.topics  || {};
+
+    updateCuriosityStats(stats);
+    renderTopicsCloud(_topics);
+    renderInsightsList(_insights);
+  } catch(e) { console.warn('[Curiosity]', e); }
+}
+
+function updateCuriosityStats(s) {
+  document.getElementById('cur-total').textContent  = s.insights_found || 0;
+  document.getElementById('cur-topics').textContent = Object.keys(_topics).length;
+  document.getElementById('cur-cycles').textContent = s.cycle || 0;
+}
+
+function renderTopicsCloud(topics) {
+  const el = document.getElementById('cur-topics-cloud');
+  el.innerHTML = '';
+  const sorted = Object.entries(topics).sort((a,b) => b[1]-a[1]);
+  sorted.forEach(([topic, count]) => {
+    const badge = document.createElement('span');
+    const intensity = Math.min(1, count / 5);
+    badge.style.cssText = `
+      padding:2px 8px; border:1px solid rgba(241,136,33,${0.24 + intensity*0.48});
+      background:rgba(34,211,238,${0.04 + intensity*0.07});
+      color:rgba(248,250,252,${0.7 + intensity*0.3});
+      font-family:Orbitron,sans-serif; font-size:7px; letter-spacing:1px;
+      cursor:pointer; transition:all .2s;
+    `;
+    badge.textContent = topic + ' (' + count + ')';
+    badge.onclick = () => filterInsightsByTopic(topic);
+    el.appendChild(badge);
+  });
+}
+
+function renderInsightsList(insights) {
+  const el = document.getElementById('cur-insights-list');
+  el.innerHTML = '';
+  if (!insights.length) {
+    el.innerHTML = '<div style="font-size:10px;color:rgba(219,234,254,.7);text-align:center;padding:12px">Analisando documentos… aguarde o primeiro ciclo.</div>';
+    return;
+  }
+  insights.slice(0, 25).forEach(ins => {
+    const div = document.createElement('div');
+    const score = Math.round(ins.curiosity_score * 100);
+    const scoreColor = score > 70 ? '#f18821' : score > 40 ? '#22d3ee' : 'rgba(219,234,254,.72)';
+    const sourceLabel = formatInsightSource(ins.source);
+    div.style.cssText = `
+      padding:8px 10px; border:1px solid rgba(34,211,238,.22);
+      background:rgba(15,45,64,.72); cursor:pointer; transition:all .2s;
+      border-left: 3px solid ${scoreColor};
+    `;
+    div.onmouseenter = function(){ this.style.background='rgba(34,211,238,.10)'; };
+    div.onmouseleave = function(){ this.style.background='rgba(15,45,64,.72)'; };
+
+    const tagsHtml = (ins.tags||[]).slice(0,3).map(t =>
+      `<span style="font-family:Orbitron,sans-serif;font-size:6.5px;padding:1px 5px;border:1px solid rgba(241,136,33,.35);color:rgba(241,136,33,.85);margin-right:3px">${t}</span>`
+    ).join('');
+
+    div.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
+        <span title="${escapeHtml(ins.source || '')}" style="font-family:Orbitron,sans-serif;font-size:8px;color:rgba(34,211,238,.62);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;padding-right:6px">📄 ${escapeHtml(sourceLabel)}</span>
+        <span style="font-family:Orbitron,sans-serif;font-size:9px;font-weight:700;color:${scoreColor};text-shadow:0 0 6px ${scoreColor}">${score}%</span>
+      </div>
+      <div style="font-size:11px;color:rgba(248,250,252,.9);line-height:1.5;margin-bottom:5px">${ins.summary}</div>
+      <div style="display:flex;gap:2px;flex-wrap:wrap;margin-bottom:4px">${tagsHtml}</div>
+      <div style="display:flex;gap:10px;font-family:Orbitron,sans-serif;font-size:7px;color:rgba(34,211,238,.3)">
+        <span>↯ S:${Math.round(ins.surprise_score*100)}%</span>
+        <span>∿ H:${Math.round(ins.entropy_score*100)}%</span>
+        <span>◈ N:${Math.round(ins.novelty_score*100)}%</span>
+        <span>🔗 ${ins.connections.length}</span>
+      </div>`;
+
+    div.onclick = () => sendInsightToChat(ins);
+    el.appendChild(div);
+  });
+}
+
+function formatInsightSource(source) {
+  const clean = String(source || 'Documento')
+    .replace(/^[a-f0-9]{16,40}_/i, '')
+    .replace(/_corpus$/i, '')
+    .replace(/\.pdf$/i, '');
+  return clean.length > 46 ? clean.slice(0, 43) + '...' : clean;
+}
+
+function escapeHtml(value) {
+  return String(value).replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  }[ch]));
+}
+
+function sendInsightToChat(ins) {
+  const msg = `JARVIS, me fale mais sobre este insight do documento "${ins.source}": ${ins.summary.replace(/\[.*?\]\s*/,'')}`;
+  document.getElementById('ifield').value = msg;
+  sendMsg();
+}
+
+async function filterInsightsByTopic(tag) {
+  try {
+    const res  = await fetch(API + '/api/curiosity/insights?n=20&tag=' + encodeURIComponent(tag));
+    const data = await res.json();
+    renderInsightsList(data.insights || []);
+    showToast(`▸ Filtrando: ${tag}`);
+  } catch(e) {}
+}
+
+async function searchInsights() {
+  const q = document.getElementById('cur-search').value.trim();
+  if (!q) { renderInsightsList(_insights); return; }
+  try {
+    const res  = await fetch(API + '/api/curiosity/search?q=' + encodeURIComponent(q));
+    const data = await res.json();
+    renderInsightsList(data.insights || []);
+    showToast(`▸ ${data.insights.length} resultados para "${q}"`);
+  } catch(e) {}
+}
+
+async function surfaceRandomInsight() {
+  try {
+    const res  = await fetch(API + '/api/curiosity/random');
+    const data = await res.json();
+    if (data.insight) {
+      sendInsightToChat(data.insight);
+      switchTab('curiosity');
+    } else {
+      showToast('⚠ Nenhum insight disponível ainda');
+    }
+  } catch(e) {}
+}
+
+function handleNewInsight(ins) {
+  // Push new insight to JARVIS chat proactively
+  if (ins && ins.curiosity_score > 0.6) {
+    addMessage(
+      `⬡ <em>Curiosidade detectada</em> em <strong>${ins.source}</strong>:<br>${ins.summary}` +
+      (ins.tags.length ? `<br><small style="opacity:.6">${ins.tags.slice(0,4).join(' · ')}</small>` : ''),
+      'jarvis'
+    );
+    addLog(`Novo insight: ${ins.source} (score: ${Math.round(ins.curiosity_score*100)}%)`);
+  }
+  // Refresh panel if open
+  const curiosityPanel = document.getElementById('tc-curiosity');
+  if (curiosityPanel && curiosityPanel.classList.contains('active')) {
+    loadCuriosityData();
+  }
+}
+
+// Periodic curiosity stats refresh (every 30s)
+setInterval(() => {
+  const curiosityPanel = document.getElementById('tc-curiosity');
+  if (curiosityPanel && curiosityPanel.classList.contains('active')) {
+    loadCuriosityData();
+  }
+}, 30000);
+
+
+// ─── Voice Synthesis (TTS) ────────────────────────────────────────────────────
+const synth   = window.speechSynthesis;
+let _voiceOn  = true;
+let _speaking = false;
+
+function jarvisSpeak(text) {
+  if (!_voiceOn || !synth) return;
+  synth.cancel();
+  // Strip HTML tags
+  const clean = text.replace(/<[^>]*>/g,'').replace(/[⬡▸◈↯∿🔗📄✦⚠]/g,'');
+  if (!clean.trim()) return;
+
+  const utt = new SpeechSynthesisUtterance(clean);
+  // Try to pick a deep voice
+  const voices = synth.getVoices();
+  const preferred = voices.find(v =>
+    v.lang.startsWith('pt') && v.name.toLowerCase().includes('male')) ||
+    voices.find(v => v.lang.startsWith('pt')) ||
+    voices.find(v => v.lang.startsWith('en') && v.name.toLowerCase().includes('male')) ||
+    voices[0];
+  if (preferred) utt.voice = preferred;
+  utt.rate  = 0.92;
+  utt.pitch = 0.85;
+  utt.volume = 0.9;
+
+  const btn = document.getElementById('voice-btn');
+  utt.onstart = () => { _speaking = true;  if(btn) btn.classList.add('speaking'); };
+  utt.onend   = () => { _speaking = false; if(btn) btn.classList.remove('speaking'); };
+  synth.speak(utt);
+}
+
+function toggleVoice() {
+  _voiceOn = !_voiceOn;
+  showToast(_voiceOn ? '🔊 Voz JARVIS ativada' : '🔇 Voz JARVIS desativada');
+}
+
+// ─── Voice Recognition (STT) ──────────────────────────────────────────────────
+let _recognition = null;
+let _listening   = false;
+
+function initSpeechRecognition() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) return null;
+  const r = new SR();
+  r.lang = 'pt-BR';
+  r.continuous = false;
+  r.interimResults = false;
+  r.onresult = (e) => {
+    const transcript = e.results[0][0].transcript;
+    document.getElementById('ifield').value = transcript;
+    sendMsg();
+  };
+  r.onend   = () => stopListening();
+  r.onerror = () => stopListening();
+  return r;
+}
+
+function toggleVoiceInput() {
+  if (_listening) { stopListening(); return; }
+  if (!_recognition) _recognition = initSpeechRecognition();
+  if (!_recognition) { showToast('⚠ Navegador sem suporte a microfone'); return; }
+  synth.cancel();
+  _listening = true;
+  const btn = document.getElementById('voice-btn');
+  if(btn){ btn.classList.add('listening'); btn.textContent = '⏹'; }
+  try { _recognition.start(); } catch(e) { stopListening(); }
+}
+
+function stopListening() {
+  _listening = false;
+  const btn = document.getElementById('voice-btn');
+  if(btn){ btn.classList.remove('listening'); btn.textContent = '🎤'; }
+  try { if(_recognition) _recognition.stop(); } catch(e) {}
+}
+
+// Patch addMessage to speak JARVIS responses
+const _origAddMessageForSpeech = addMessage;
+addMessage = function(text, role, sources) {
+  _origAddMessageForSpeech(text, role, sources);
+  if (role === 'jarvis') jarvisSpeak(text);
+};
+
+// ─── Analytics Charts ─────────────────────────────────────────────────────────
+let _metricsChart   = null;
+let _curiosityChart = null;
+
+function initMetricsChart() {
+  const ctx = document.getElementById('metrics-chart').getContext('2d');
+  _metricsChart = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: [],
+      datasets: [
+        { label:'CPU', data:[], borderColor:'#22d3ee', backgroundColor:'rgba(34,211,238,.08)', fill:true, tension:.3, pointRadius:0 },
+        { label:'RAM', data:[], borderColor:'#f18821', backgroundColor:'rgba(241,136,33,.06)', fill:true, tension:.3, pointRadius:0 },
+      ]
+    },
+    options: {
+      animation:false, responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ labels:{ color:'rgba(34,211,238,.5)', font:{ size:9, family:'Orbitron' } } } },
+      scales:{
+        x:{ ticks:{ color:'rgba(34,211,238,.3)', font:{size:8}, maxTicksLimit:6 }, grid:{ color:'rgba(34,211,238,.05)' } },
+        y:{ min:0, max:100, ticks:{ color:'rgba(34,211,238,.3)', font:{size:8} }, grid:{ color:'rgba(34,211,238,.05)' } }
+      }
+    }
+  });
+}
+
+function initCuriosityChart() {
+  const ctx = document.getElementById('curiosity-chart').getContext('2d');
+  _curiosityChart = new Chart(ctx, {
+    type: 'bar',
+    data: { labels:[], datasets:[
+      { label:'Insights/ciclo', data:[], backgroundColor:'rgba(241,136,33,.42)', borderColor:'#f18821', borderWidth:1 },
+    ]},
+    options: {
+      animation:false, responsive:true, maintainAspectRatio:false,
+      plugins:{ legend:{ display:false } },
+      scales:{
+        x:{ ticks:{ color:'rgba(34,211,238,.3)', font:{size:7}, maxTicksLimit:8 }, grid:{ color:'rgba(34,211,238,.05)' } },
+        y:{ min:0, ticks:{ color:'rgba(34,211,238,.3)', font:{size:8} }, grid:{ color:'rgba(34,211,238,.05)' } }
+      }
+    }
+  });
+}
+
+async function loadAnalytics() {
+  try {
+    const [statsRes, histRes, curStatsRes, trainHistRes] = await Promise.all([
+      fetch(API + '/api/db/stats'),
+      fetch(API + '/api/metrics/history?minutes=30'),
+      fetch(API + '/api/curiosity/stats'),
+      fetch(API + '/api/train/status'),
+    ]);
+    const stats    = await statsRes.json();
+    const hist     = await histRes.json();
+    const curStats = await curStatsRes.json();
+    const trainSt  = await trainHistRes.json();
+
+    // Stat boxes
+    document.getElementById('an-msgs').textContent = stats.messages  || 0;
+    document.getElementById('an-docs').textContent = stats.documents || 0;
+    document.getElementById('an-ins').textContent  = stats.insights  || 0;
+    document.getElementById('an-proj').textContent = stats.projects  || 0;
+
+    // Metrics history chart
+    if (!_metricsChart) initMetricsChart();
+    const history = hist.history || [];
+    const fmt = ts => new Date(ts*1000).toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+    _metricsChart.data.labels   = history.map(h => fmt(h.ts));
+    _metricsChart.data.datasets[0].data = history.map(h => h.cpu_pct);
+    _metricsChart.data.datasets[1].data = history.map(h => h.ram_pct);
+    _metricsChart.update();
+
+    // Curiosity timeline
+    if (!_curiosityChart) initCuriosityChart();
+    const timeline = curStats.curiosity_timeline || [];
+    _curiosityChart.data.labels   = timeline.map(c => `#${c.cycle_num}`);
+    _curiosityChart.data.datasets[0].data = timeline.map(c => c.insights_found);
+    _curiosityChart.update();
+
+    // Training history
+    const trainList = document.getElementById('train-hist-list');
+    trainList.innerHTML = '';
+    const status = trainSt.is_trained ? '✓ TREINADO' : trainSt.is_training ? '⏳ TREINANDO' : '— AGUARDANDO';
+    const color  = trainSt.is_trained ? '#f18821' : trainSt.is_training ? '#22d3ee' : 'rgba(219,234,254,.58)';
+    trainList.innerHTML = `<div style="font-size:11px;color:${color};font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:2px;padding:6px;border:1px solid ${color}33;background:${color}08">${status} | DOCS: ${trainSt.documents} | CHUNKS: ${trainSt.chunks}</div>`;
+
+  } catch(e) { console.warn('[Analytics]', e); }
+}
+
+// ─── Project Download ──────────────────────────────────────────────────────────
+async function downloadProject(pid) {
+  showToast('⬡ Gerando arquivos do projeto…');
+  window.open(API + `/api/project/${pid}/download`, '_blank');
+}
+
+// ─── Init ─────────────────────────────────────────────────────────────────────
+loadDocuments();
+addLog('Sistemas JARVIS inicializados');
+addLog('Interface HUD carregada');
+</script>
+</body>
+</html>
