@@ -7,10 +7,10 @@ J.A.R.V.I.S. LocalHost e um assistente de IA local servido por FastAPI, com HUD 
 ## Principais Recursos
 
 - Backend FastAPI com endpoints REST e WebSocket.
-- Frontend local em `static/index.html`.
+- Frontend local em `jarvis_localhost/web/static/index.html`.
 - Pipeline de upload e processamento de PDFs com extracao de texto, tabelas, imagens e OCR.
-- RAG local com corpus em `data/embeddings`.
-- Transformer decoder-only e tokenizador proprio em `neural.py`.
+- RAG local com corpus em `jarvis_localhost/data/embeddings`.
+- Transformer decoder-only e tokenizador proprio em `jarvis_localhost/ai/neural.py`.
 - Banco SQLite local para historico, documentos, metricas, projetos e treinamento.
 - Curiosidade autonoma para gerar insights a partir do corpus local.
 - Monitoramento de CPU, RAM, disco e rede.
@@ -21,24 +21,33 @@ J.A.R.V.I.S. LocalHost e um assistente de IA local servido por FastAPI, com HUD 
 
 ```text
 .
-├── app.py                    # Servidor FastAPI e rotas HTTP/WebSocket
-├── brain.py                  # Orquestrador central do Jarvis
-├── neural.py                 # Modelo, tokenizador, treino, RAG e curiosidade
-├── database.py               # Persistencia SQLite
-├── pdf_processor.py          # Processamento de PDFs e OCR
-├── project_manager.py        # Geracao de projetos locais
-├── cluster_client.py         # Cliente de offload LAN opcional
-├── local_voice.py            # Voz offline opcional
-├── system_monitor.py         # Telemetria local
-├── static/index.html         # HUD principal
-├── docs/                     # Documentacao tecnica e legado
-├── scripts/                  # Automacao local de setup/run/validacao
-├── data/                     # Estado local gerado em runtime, ignorado pelo Git
-├── uploads/                  # Uploads locais, ignorados pelo Git
-└── requirements.txt          # Dependencias Python
+├── .github/                  # Workflows do GitHub Actions
+├── .editorconfig             # Padrao de editor
+├── .env.example              # Exemplo de configuracao local
+├── .gitattributes            # Normalizacao de arquivos no Git
+├── .gitignore                # Arquivos ignorados
+├── LICENSE
+├── README.md
+└── jarvis_localhost/         # Codigo, frontend, docs, scripts e runtime local
+    ├── server/app.py         # Servidor FastAPI e rotas HTTP/WebSocket
+    ├── core/brain.py         # Orquestrador central do Jarvis
+    ├── ai/                   # Modelo, tokenizador, treino e inferencia
+    ├── storage/              # Persistencia SQLite
+    ├── processing/           # Processamento de PDFs e OCR
+    ├── projects/             # Geracao de projetos locais
+    ├── integrations/         # Voz e offload LAN opcionais
+    ├── monitoring/           # Telemetria local
+    ├── curiosity/            # Motor standalone de curiosidade
+    ├── legacy/               # Compatibilidade/experimentos antigos
+    ├── web/static/index.html # HUD principal
+    ├── docs/                 # Documentacao tecnica e legado
+    ├── tools/                # Automacao local de setup/run/validacao
+    ├── data/                 # Estado local gerado em runtime, ignorado pelo Git
+    ├── uploads/              # Uploads locais, ignorados pelo Git
+    └── requirements.txt      # Dependencias Python
 ```
 
-Os diretorios `data/` e `uploads/` sao mantidos no repositorio apenas com `.gitkeep`. Bancos, modelos, embeddings, PDFs enviados, imagens extraidas e checkpoints nao devem ser versionados.
+Os diretorios `jarvis_localhost/data/` e `jarvis_localhost/uploads/` sao mantidos no repositorio apenas com `.gitkeep`. Bancos, modelos, embeddings, PDFs enviados, imagens extraidas e checkpoints nao devem ser versionados.
 
 ## Requisitos
 
@@ -51,8 +60,8 @@ Os diretorios `data/` e `uploads/` sao mantidos no repositorio apenas com `.gitk
 
 ```powershell
 cd C:\caminho\para\JarvisLocalHost
-.\scripts\setup.ps1
-.\scripts\run.ps1
+.\jarvis_localhost\tools\setup.ps1
+.\jarvis_localhost\tools\run.ps1
 ```
 
 Depois abra:
@@ -64,17 +73,17 @@ http://127.0.0.1:8000
 Setup manual:
 
 ```powershell
-python -m venv .venv
-.\.venv\Scripts\Activate.ps1
+python -m venv jarvis_localhost\.venv
+.\jarvis_localhost\.venv\Scripts\Activate.ps1
 python -m pip install --upgrade pip
-pip install -r requirements.txt
-python app.py
+pip install -r jarvis_localhost\requirements.txt
+python -m jarvis_localhost.server.app
 ```
 
 ## Validacao Local
 
 ```powershell
-.\scripts\validate.ps1
+.\jarvis_localhost\tools\validate.ps1
 ```
 
 A validacao atual verifica:
@@ -82,7 +91,7 @@ A validacao atual verifica:
 - arquivos essenciais do projeto;
 - presenca do frontend principal;
 - compilacao sintatica dos arquivos Python versionados;
-- ausencia de artefatos de runtime rastreados em `data/` e `uploads/`, exceto `.gitkeep`.
+- ausencia de artefatos de runtime rastreados em `jarvis_localhost/data/` e `jarvis_localhost/uploads/`, exceto `.gitkeep`.
 
 ## Variaveis De Ambiente
 
@@ -122,21 +131,21 @@ Principais chaves:
 
 O projeto foi preparado para execucao local. Os dados sensiveis e gerados pelo usuario ficam fora do Git por padrao:
 
-- `data/jarvis.db`
-- `data/models/*.pt`
-- `data/embeddings/*`
-- `data/extracted_images/*`
-- `data/curiosity/*`
-- `data/projects/*`
-- `uploads/*`
+- `jarvis_localhost/data/jarvis.db`
+- `jarvis_localhost/data/models/*.pt`
+- `jarvis_localhost/data/embeddings/*`
+- `jarvis_localhost/data/extracted_images/*`
+- `jarvis_localhost/data/curiosity/*`
+- `jarvis_localhost/data/projects/*`
+- `jarvis_localhost/uploads/*`
 
 Se for necessario publicar um exemplo, use arquivos anonimizados e pequenos dentro de uma pasta de documentacao apropriada.
 
 ## Documentacao
 
-- [Arquitetura](docs/ARCHITECTURE.md)
-- [Desenvolvimento](docs/DEVELOPMENT.md)
-- [Pagina HTML legada](docs/legacy/homepage.html)
+- [Arquitetura](jarvis_localhost/docs/ARCHITECTURE.md)
+- [Desenvolvimento](jarvis_localhost/docs/DEVELOPMENT.md)
+- [Pagina HTML legada](jarvis_localhost/docs/legacy/homepage.html)
 
 ## Licenca
 

@@ -1,0 +1,1 @@
+"""Standalone curiosity utilities package."""
