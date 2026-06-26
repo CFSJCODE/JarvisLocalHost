@@ -1,8 +1,8 @@
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-$Root = Split-Path -Parent $PSScriptRoot
-Set-Location $Root
+$AppRoot = Split-Path -Parent $PSScriptRoot
+Set-Location $AppRoot
 
 if (-not (Get-Command python -ErrorAction SilentlyContinue)) {
     throw "Python nao encontrado no PATH."

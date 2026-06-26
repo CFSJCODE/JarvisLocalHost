@@ -3,8 +3,6 @@ brain.py — J.A.R.V.I.S Central Intelligence
 Orchestrates the neural model, RAG, PDF processor and system monitor.
 """
 
-import sys, os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import re
 import json
 import asyncio
@@ -13,27 +11,18 @@ import time
 from pathlib import Path
 from typing import Dict, Any, Optional, Callable, List
 
-# Importa do arquivo único neural.py (ou do pacote neural/ como fallback)
-try:
-    from neural import (
-        JarvisTransformer, JarvisConfig,
-        JarvisTokenizer, JarvisTrainer, TrainConfig,
-        VectorStore, RAGEngine,
-        CuriosityEngine, Insight,
-    )
-except ImportError:
-    # Fallback: pacote neural/
-    from neural.model      import JarvisTransformer, JarvisConfig
-    from neural.tokenizer  import JarvisTokenizer
-    from neural.trainer    import JarvisTrainer, TrainConfig
-    from neural.embeddings import VectorStore, RAGEngine
-    from neural.curiosity  import CuriosityEngine, Insight
-from pdf_processor   import PDFProcessor
-from system_monitor  import SystemMonitor
-from database        import JarvisDB
-from project_manager import ProjectManager
-from cluster_client  import ClusterClient, ClusterError
-from local_voice     import LocalVoice
+from jarvis_localhost.ai.neural import (
+    JarvisTransformer, JarvisConfig,
+    JarvisTokenizer, JarvisTrainer, TrainConfig,
+    VectorStore, RAGEngine,
+    CuriosityEngine, Insight,
+)
+from jarvis_localhost.processing.pdf_processor import PDFProcessor
+from jarvis_localhost.monitoring.system_monitor import SystemMonitor
+from jarvis_localhost.storage.database import JarvisDB
+from jarvis_localhost.projects.project_manager import ProjectManager
+from jarvis_localhost.integrations.cluster_client import ClusterClient, ClusterError
+from jarvis_localhost.integrations.local_voice import LocalVoice
 
 
 # ─── Conversation State ───────────────────────────────────────────────────────

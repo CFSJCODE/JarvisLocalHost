@@ -15,11 +15,12 @@ from typing import Dict, Any, List, Optional, Set
 from contextlib import asynccontextmanager
 
 # --- Configuração Robusta de Paths ---
-BASE_DIR = Path(__file__).resolve().parent
-sys.path.insert(0, str(BASE_DIR))
-os.chdir(str(BASE_DIR))
+APP_DIR = Path(__file__).resolve().parents[1]
+REPO_ROOT = APP_DIR.parent
+sys.path.insert(0, str(REPO_ROOT))
+os.chdir(str(APP_DIR))
 
-STATIC_DIR = BASE_DIR / "static"
+STATIC_DIR = APP_DIR / "web" / "static"
 INDEX_PATH = STATIC_DIR / "index.html"
 
 # Diretórios requeridos
@@ -30,9 +31,9 @@ for _d in [
     "data/curiosity",
     "data/projects",
     "uploads",
-    "static",
+    "web/static",
 ]:
-    (BASE_DIR / _d).mkdir(parents=True, exist_ok=True)
+    (APP_DIR / _d).mkdir(parents=True, exist_ok=True)
 
 
 def setup_event_loop() -> None:
@@ -57,7 +58,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from brain import JarvisBrain
+from jarvis_localhost.core.brain import JarvisBrain
 
 # Instância base
 brain = JarvisBrain()
@@ -208,7 +209,7 @@ async def inferencia_direta(req: ChatRequest):
     global direct_engine
     try:
         if direct_engine is None:
-            from engine_ai import DirectInferenceEngine
+            from jarvis_localhost.ai.engine_ai import DirectInferenceEngine
             direct_engine = DirectInferenceEngine(brain)
         response = await direct_engine.answer(req.message)
         return _normalize_chat_response(response)
@@ -234,7 +235,7 @@ async def upload_pdf(file: UploadFile = File(...)):
     if not file.filename.lower().endswith(".pdf"):
         raise HTTPException(400, "Formato invalido (PDF apenas).")
 
-    dest = BASE_DIR / "uploads" / f"{uuid.uuid4().hex}_{file.filename}"
+    dest = APP_DIR / "uploads" / f"{uuid.uuid4().hex}_{file.filename}"
 
     # Resolvendo gargalo de bloqueio na event loop para leitura binária
     def _save_file():
@@ -276,7 +277,7 @@ async def download_project(project_id: str):
     files = project.get("files") or []
     zip_path = Path(files[0]) if files else Path(project.get("zip_path", ""))
     if not zip_path.is_absolute():
-        zip_path = BASE_DIR / zip_path
+        zip_path = APP_DIR / zip_path
     if not zip_path.exists():
         raise HTTPException(404, "Arquivo do projeto não encontrado.")
 
@@ -306,7 +307,7 @@ async def start_training():
 
 @app.get("/api/train/status")
 async def train_status():
-    doc_count = len(list((BASE_DIR / "data/embeddings").glob("*_meta.json")))
+    doc_count = len(list((APP_DIR / "data/embeddings").glob("*_meta.json")))
     return {
         "is_training": brain.is_training,
         "is_trained": brain.is_trained,
@@ -319,7 +320,7 @@ async def train_status():
 async def list_documents():
     def _read_meta():
         docs = []
-        for p in (BASE_DIR / "data/embeddings").glob("*_meta.json"):
+        for p in (APP_DIR / "data/embeddings").glob("*_meta.json"):
             try:
                 docs.append(json.loads(p.read_text(encoding="utf-8")))
             except Exception: pass
@@ -453,4 +454,11 @@ async def websocket_endpoint(ws: WebSocket):
 if __name__ == "__main__":
     # Correção da porta de 8080 para 8000 para sincronia matemática com o frontend.
     # Removido reload em prod para liberar memória.
-    uvicorn.run("app:app", host="127.0.0.1", port=8000, reload=True, log_level="info")
+    uvicorn.run(
+        "jarvis_localhost.server.app:app",
+        host="127.0.0.1",
+        port=8000,
+        reload=True,
+        reload_dirs=[str(APP_DIR)],
+        log_level="info",
+    )
