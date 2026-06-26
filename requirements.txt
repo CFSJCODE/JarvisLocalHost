@@ -1,0 +1,38 @@
+## J.A.R.V.I.S — Dependencies
+## Install: pip install -r requirements.txt
+
+# ─── Web Server ───────────────────────────────────────────────────────────────
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+python-multipart==0.0.9
+websockets==12.0
+aiofiles==23.2.1
+
+# ─── System Monitoring ────────────────────────────────────────────────────────
+psutil==5.9.8
+
+# ─── PDF & Document Processing ───────────────────────────────────────────────
+pymupdf==1.24.3           # fitz — fast PDF text + image extraction
+pdfplumber==0.11.0        # table extraction from PDFs
+Pillow==10.3.0            # image processing
+pytesseract==0.3.10       # OCR on images inside PDFs
+
+# ─── Deep Learning / Neural Network ──────────────────────────────────────────
+torch==2.3.0              # PyTorch — neural network from scratch
+numpy==1.26.4
+scipy==1.13.0
+
+# ─── NLP / Text Processing ───────────────────────────────────────────────────
+regex==2024.4.28          # BPE tokenizer
+tiktoken==0.7.0           # fast tokenizer (fallback)
+nltk==3.8.1
+
+# ─── Local Voice (optional, no cloud STT/TTS API) ────────────────────────────
+pyttsx3==2.90
+
+# ─── Storage & Utilities ─────────────────────────────────────────────────────
+tqdm==4.66.4
+pydantic==2.7.1
+python-dotenv==1.0.1
+rich==13.7.1              # pretty terminal output
+loguru==0.7.2
