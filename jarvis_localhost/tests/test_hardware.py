@@ -133,7 +133,7 @@ def missing_loader(name: str) -> object:
 class DeviceSelectionTests(unittest.TestCase):
     def test_import_and_cpu_fallback_work_without_torch(self) -> None:
         descriptor = select_compute_device(
-            target_hardware(), module_loader=missing_loader
+            target_hardware(), env={}, module_loader=missing_loader
         )
 
         self.assertEqual("cpu", descriptor.backend)
@@ -158,7 +158,7 @@ class DeviceSelectionTests(unittest.TestCase):
             smoke_calls.append((str(device), backend))
 
         descriptor = select_compute_device(
-            target_hardware(), module_loader=loader, smoke_test=smoke
+            target_hardware(), env={}, module_loader=loader, smoke_test=smoke
         )
 
         self.assertEqual("directml", descriptor.backend)
@@ -179,7 +179,7 @@ class DeviceSelectionTests(unittest.TestCase):
                 raise RuntimeError("simulated DirectML kernel failure")
 
         descriptor = select_compute_device(
-            target_hardware(), module_loader=loader, smoke_test=smoke
+            target_hardware(), env={}, module_loader=loader, smoke_test=smoke
         )
 
         self.assertEqual("cuda", descriptor.backend)
@@ -194,6 +194,7 @@ class DeviceSelectionTests(unittest.TestCase):
 
         descriptor = select_compute_device(
             target_hardware(system="Linux"),
+            env={},
             module_loader=lambda _name: fake_torch,
             smoke_test=lambda _torch, _device, _backend: None,
         )
@@ -206,6 +207,7 @@ class DeviceSelectionTests(unittest.TestCase):
 
         descriptor = select_compute_device(
             target_hardware(system="Darwin"),
+            env={},
             module_loader=lambda _name: fake_torch,
             smoke_test=lambda _torch, _device, _backend: None,
         )
