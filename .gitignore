@@ -77,3 +77,6 @@ jarvis_localhost/tools/.watchdog.lock
 # Agent/tool workspace metadata (not source)
 .work-folder-info
 .vfsmeta/
+
+# Generated type stubs (not project source)
+.stubs/
