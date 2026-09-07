@@ -1,0 +1,469 @@
+{
+  "events": [
+    {
+      "percent": 2,
+      "message": "Fixando snapshot canônico."
+    },
+    {
+      "percent": 5,
+      "message": "Perfil compact: 1,044,736 parâmetros; backend cpu.",
+      "profile": {
+        "profile_version": 1,
+        "backend": "cpu",
+        "corpus": {
+          "document_count": 1,
+          "byte_count": 108421,
+          "character_count": 104799,
+          "estimated_tokens": 26200,
+          "source_kind": "text"
+        },
+        "model_tier": "compact",
+        "vocabulary_size": 2000,
+        "context_length": 128,
+        "embedding_dimension": 128,
+        "attention_heads": 4,
+        "transformer_layers": 4,
+        "feed_forward_dimension": 512,
+        "estimated_parameter_count": 1044736,
+        "batch_size": 4,
+        "gradient_accumulation_steps": 2,
+        "effective_batch_size": 8,
+        "max_steps": 312,
+        "evaluation_interval": 62,
+        "checkpoint_interval": 156,
+        "host_memory_budget_bytes": 3365368627,
+        "accelerator_memory_budget_bytes": 0,
+        "cpu_threads": 2,
+        "interop_threads": 1,
+        "dataloader_workers": 1,
+        "rag_chunk_tokens": 128,
+        "rag_overlap_tokens": 16,
+        "pretrained_weights": false,
+        "runtime_downloads_allowed": false,
+        "reason": "compact model derived from 26200 estimated corpus tokens, 3.13 GiB host budget and 0.0 GiB accelerator budget on cpu.",
+        "warnings": [],
+        "host_memory_budget_mib": 3209,
+        "accelerator_memory_budget_mib": 0
+      }
+    },
+    {
+      "percent": 8,
+      "message": "Treinando tokenizador BPE do zero."
+    },
+    {
+      "percent": 8.2,
+      "message": "Treinando tokenizador BPE: 100/2000 tokens."
+    },
+    {
+      "percent": 8.4,
+      "message": "Treinando tokenizador BPE: 200/2000 tokens."
+    },
+    {
+      "percent": 8.6,
+      "message": "Treinando tokenizador BPE: 300/2000 tokens."
+    },
+    {
+      "percent": 8.8,
+      "message": "Treinando tokenizador BPE: 400/2000 tokens."
+    },
+    {
+      "percent": 9.0,
+      "message": "Treinando tokenizador BPE: 500/2000 tokens."
+    },
+    {
+      "percent": 9.2,
+      "message": "Treinando tokenizador BPE: 600/2000 tokens."
+    },
+    {
+      "percent": 9.4,
+      "message": "Treinando tokenizador BPE: 700/2000 tokens."
+    },
+    {
+      "percent": 9.6,
+      "message": "Treinando tokenizador BPE: 800/2000 tokens."
+    },
+    {
+      "percent": 9.8,
+      "message": "Treinando tokenizador BPE: 900/2000 tokens."
+    },
+    {
+      "percent": 10.0,
+      "message": "Treinando tokenizador BPE: 1000/2000 tokens."
+    },
+    {
+      "percent": 10.2,
+      "message": "Treinando tokenizador BPE: 1100/2000 tokens."
+    },
+    {
+      "percent": 10.4,
+      "message": "Treinando tokenizador BPE: 1200/2000 tokens."
+    },
+    {
+      "percent": 10.6,
+      "message": "Treinando tokenizador BPE: 1300/2000 tokens."
+    },
+    {
+      "percent": 10.8,
+      "message": "Treinando tokenizador BPE: 1400/2000 tokens."
+    },
+    {
+      "percent": 11.0,
+      "message": "Treinando tokenizador BPE: 1500/2000 tokens."
+    },
+    {
+      "percent": 11.2,
+      "message": "Treinando tokenizador BPE: 1600/2000 tokens."
+    },
+    {
+      "percent": 11.4,
+      "message": "Treinando tokenizador BPE: 1700/2000 tokens."
+    },
+    {
+      "percent": 11.6,
+      "message": "Treinando tokenizador BPE: 1800/2000 tokens."
+    },
+    {
+      "percent": 11.8,
+      "message": "Treinando tokenizador BPE: 1900/2000 tokens."
+    },
+    {
+      "percent": 12.0,
+      "message": "Treinando tokenizador BPE: 2000/2000 tokens."
+    },
+    {
+      "step": 0,
+      "loss": 7.604123,
+      "lr": 9.677419354838709e-06,
+      "tokens_seen": 1024,
+      "elapsed_seconds": 0.444,
+      "progress": 0.32,
+      "percent": 12.2,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 15,
+      "loss": 7.383325,
+      "lr": 0.00015483870967741934,
+      "tokens_seen": 16384,
+      "elapsed_seconds": 2.773,
+      "progress": 5.13,
+      "percent": 15.23,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 30,
+      "loss": 6.973354,
+      "lr": 0.0003,
+      "tokens_seen": 31744,
+      "elapsed_seconds": 4.298,
+      "progress": 9.94,
+      "percent": 18.26,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 45,
+      "loss": 7.020209,
+      "lr": 0.0002983497105212307,
+      "tokens_seen": 47104,
+      "elapsed_seconds": 5.9,
+      "progress": 14.74,
+      "percent": 21.29,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 60,
+      "loss": 6.114812,
+      "lr": 0.0002929663761983513,
+      "tokens_seen": 62464,
+      "elapsed_seconds": 7.565,
+      "progress": 19.55,
+      "percent": 24.32,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 62,
+      "val_loss": 6.418531,
+      "percent": 12.0,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 75,
+      "loss": 5.985691,
+      "lr": 0.00028399260386762696,
+      "tokens_seen": 77824,
+      "elapsed_seconds": 9.331,
+      "progress": 24.36,
+      "percent": 27.35,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 90,
+      "loss": 5.853223,
+      "lr": 0.000271680176647461,
+      "tokens_seen": 93184,
+      "elapsed_seconds": 10.81,
+      "progress": 29.17,
+      "percent": 30.38,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 105,
+      "loss": 5.267784,
+      "lr": 0.0002563745525243449,
+      "tokens_seen": 108544,
+      "elapsed_seconds": 12.316,
+      "progress": 33.97,
+      "percent": 33.4,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 120,
+      "loss": 5.422273,
+      "lr": 0.00023850517160761058,
+      "tokens_seen": 123904,
+      "elapsed_seconds": 13.846,
+      "progress": 38.78,
+      "percent": 36.43,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 124,
+      "val_loss": 6.254074,
+      "percent": 12.0,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 135,
+      "loss": 4.617308,
+      "lr": 0.00021857340704172103,
+      "tokens_seen": 139264,
+      "elapsed_seconds": 15.584,
+      "progress": 43.59,
+      "percent": 39.46,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 150,
+      "loss": 5.620199,
+      "lr": 0.00019713849764539426,
+      "tokens_seen": 154624,
+      "elapsed_seconds": 17.052,
+      "progress": 48.4,
+      "percent": 42.49,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 165,
+      "loss": 5.837347,
+      "lr": 0.0001748018569748912,
+      "tokens_seen": 169984,
+      "elapsed_seconds": 18.566,
+      "progress": 53.21,
+      "percent": 45.52,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 180,
+      "loss": 5.696337,
+      "lr": 0.00015219019906254996,
+      "tokens_seen": 185344,
+      "elapsed_seconds": 20.081,
+      "progress": 58.01,
+      "percent": 48.55,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 186,
+      "val_loss": 6.336356,
+      "percent": 12.0,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 195,
+      "loss": 4.775946,
+      "lr": 0.00012993795428297922,
+      "tokens_seen": 200704,
+      "elapsed_seconds": 21.804,
+      "progress": 62.82,
+      "percent": 51.58,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 210,
+      "loss": 6.01819,
+      "lr": 0.00010866946871668856,
+      "tokens_seen": 216064,
+      "elapsed_seconds": 23.682,
+      "progress": 67.63,
+      "percent": 54.61,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 225,
+      "loss": 4.938935,
+      "lr": 8.898148645548635e-05,
+      "tokens_seen": 231424,
+      "elapsed_seconds": 25.168,
+      "progress": 72.44,
+      "percent": 57.64,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 240,
+      "loss": 5.241439,
+      "lr": 7.142640635529428e-05,
+      "tokens_seen": 246784,
+      "elapsed_seconds": 26.58,
+      "progress": 77.24,
+      "percent": 60.66,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 248,
+      "val_loss": 6.334151,
+      "percent": 12.0,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 255,
+      "loss": 4.968,
+      "lr": 5.649678301283538e-05,
+      "tokens_seen": 262144,
+      "elapsed_seconds": 28.333,
+      "progress": 82.05,
+      "percent": 63.69,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 270,
+      "loss": 5.788606,
+      "lr": 4.4611506832636546e-05,
+      "tokens_seen": 277504,
+      "elapsed_seconds": 29.806,
+      "progress": 86.86,
+      "percent": 66.72,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 285,
+      "loss": 5.264421,
+      "lr": 3.610405093942684e-05,
+      "tokens_seen": 292864,
+      "elapsed_seconds": 31.382,
+      "progress": 91.67,
+      "percent": 69.75,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 300,
+      "loss": 5.449312,
+      "lr": 3.121311470015327e-05,
+      "tokens_seen": 308224,
+      "elapsed_seconds": 32.912,
+      "progress": 96.47,
+      "percent": 72.78,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 310,
+      "val_loss": 6.308617,
+      "percent": 12.0,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "step": 311,
+      "loss": 5.16432,
+      "lr": 3.000843696708379e-05,
+      "tokens_seen": 319488,
+      "elapsed_seconds": 34.353,
+      "progress": 100.0,
+      "percent": 75.0,
+      "message": "Treinando modelo de linguagem local."
+    },
+    {
+      "percent": 77,
+      "message": "Treinando recuperador contrastivo do zero."
+    },
+    {
+      "percent": 89.0,
+      "message": "Treinando recuperador contrastivo do zero.",
+      "retriever": {
+        "epoch": 1,
+        "loss": 1.1976860511032017,
+        "steps": 176
+      }
+    },
+    {
+      "percent": 90,
+      "message": "Indexando evidências canônicas."
+    },
+    {
+      "done": true,
+      "percent": 100,
+      "message": "Treinamento soberano concluído; BPE, LM, recuperador e índice compartilham a mesma linhagem.",
+      "corpus_sha256": "96cfebbe60d9f9cec8735a9678597fc8c2aca4667d0c052de405ff5e5fcef6ce",
+      "warning": ""
+    }
+  ],
+  "elapsed_s": 58.019849688999784,
+  "is_trained": true,
+  "pipeline_error": null,
+  "final_progress": {
+    "percent": 100,
+    "message": "Treinamento soberano concluído; BPE, LM, recuperador e índice compartilham a mesma linhagem.",
+    "updated_at": 1788126462.423204,
+    "profile": {
+      "profile_version": 1,
+      "backend": "cpu",
+      "corpus": {
+        "document_count": 1,
+        "byte_count": 108421,
+        "character_count": 104799,
+        "estimated_tokens": 26200,
+        "source_kind": "text"
+      },
+      "model_tier": "compact",
+      "vocabulary_size": 2000,
+      "context_length": 128,
+      "embedding_dimension": 128,
+      "attention_heads": 4,
+      "transformer_layers": 4,
+      "feed_forward_dimension": 512,
+      "estimated_parameter_count": 1044736,
+      "batch_size": 4,
+      "gradient_accumulation_steps": 2,
+      "effective_batch_size": 8,
+      "max_steps": 312,
+      "evaluation_interval": 62,
+      "checkpoint_interval": 156,
+      "host_memory_budget_bytes": 3365368627,
+      "accelerator_memory_budget_bytes": 0,
+      "cpu_threads": 2,
+      "interop_threads": 1,
+      "dataloader_workers": 1,
+      "rag_chunk_tokens": 128,
+      "rag_overlap_tokens": 16,
+      "pretrained_weights": false,
+      "runtime_downloads_allowed": false,
+      "reason": "compact model derived from 26200 estimated corpus tokens, 3.13 GiB host budget and 0.0 GiB accelerator budget on cpu.",
+      "warnings": [],
+      "host_memory_budget_mib": 3209,
+      "accelerator_memory_budget_mib": 0
+    },
+    "step": 311,
+    "loss": 5.16432,
+    "lr": 3.000843696708379e-05,
+    "tokens_seen": 319488,
+    "elapsed_seconds": 34.353,
+    "progress": 100.0,
+    "val_loss": 6.308617,
+    "retriever": {
+      "epoch": 1,
+      "loss": 1.1976860511032017,
+      "steps": 176
+    },
+    "done": true,
+    "corpus_sha256": "96cfebbe60d9f9cec8735a9678597fc8c2aca4667d0c052de405ff5e5fcef6ce",
+    "warning": ""
+  }
+}

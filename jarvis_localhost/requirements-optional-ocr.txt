@@ -1,0 +1,4 @@
+# NON-SOVEREIGN OPTIONAL FEATURE.
+# Tesseract language data contains pretrained recognition state and is blocked
+# whenever JARVIS_SOVEREIGN_MODE=1. Install only for an explicitly relaxed mode.
+pytesseract==0.3.10

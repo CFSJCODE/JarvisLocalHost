@@ -1,0 +1,546 @@
+{
+  "strict": {
+    "Q1_factual": {
+      "question": "What is the circuit voltage of the MQ-5 gas sensor?",
+      "answer": "• This pin does not have any internal pull resistors and the strapping value must be controlled by the external circuit that cannot be in a high impedance state [E2].\n\n• JTAG Signal Source Control The strapping pin GPIO15 can be used to control the source of JTAG signals during the early boot process [E2].",
+      "method": "extractive",
+      "abstained": false,
+      "retrieval_confidence": 0.2926,
+      "reason": "",
+      "grounded": true,
+      "citations": [
+        {
+          "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+          "page": 1,
+          "chunk_id": "chk_70f20f66fd746437ae3e1aba561306de"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 15,
+          "chunk_id": "chk_8416dcc1833f25c6be9765e69559442a"
+        },
+        {
+          "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+          "page": 1,
+          "chunk_id": "chk_25b4dbadbbf3f2c01636440990f91d3b"
+        }
+      ],
+      "elapsed_s": 0.0138
+    },
+    "Q2_factual": {
+      "question": "How many GPIOs does the ESP32-C6-WROOM-1 have?",
+      "answer": "Não encontrei evidência suficiente nos documentos autorizados para responder com segurança.",
+      "method": "abstention",
+      "abstained": true,
+      "retrieval_confidence": 0.1353,
+      "reason": "retrieval_below_threshold",
+      "grounded": null,
+      "citations": [
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 10,
+          "chunk_id": "chk_fd66b9618aabd318ce11c3ff01d8fb0e"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 4,
+          "chunk_id": "chk_4fa994d25ad1074b5551015d27e8e5c5"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 42,
+          "chunk_id": "chk_70e5d03946b816554314007eeabfa0ea"
+        }
+      ],
+      "elapsed_s": 0.0063
+    },
+    "Q3_semantic": {
+      "question": "What material is used in the gas sensing layer of the MQ-5?",
+      "answer": "• Gas sensing layer Electrode Electrode line Heater coil Tubular ceramic Anti-explosion | SnO2 Au Pt Ni-Cr alloy Al2O3 Stainless steel gauze | | | | | | | | | guration B | [E1].\n\n• JTAG Signal Source Control The strapping pin GPIO15 can be used to control the source of JTAG signals during the early boot process [E2].\n\n• The recommended setting for the RC delay circuit is usually R = 10 k and Ω C = 1 F [E3].\n\n• If you choose to solder it, please apply the correct amount of soldering paste [E3].",
+      "method": "extractive",
+      "abstained": false,
+      "retrieval_confidence": 0.4146,
+      "reason": "",
+      "grounded": true,
+      "citations": [
+        {
+          "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+          "page": 1,
+          "chunk_id": "chk_8d9954c17773f4897265fef39f648b05"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 15,
+          "chunk_id": "chk_8416dcc1833f25c6be9765e69559442a"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 40,
+          "chunk_id": "chk_7580c08dc4839d5f567d589516c99034"
+        }
+      ],
+      "elapsed_s": 0.0096
+    },
+    "Q4_semantic": {
+      "question": "What operating ambient temperature range does the ESP32-C6-WROOM-1 module support?",
+      "answer": "• Pin Layout (Top View) 3.2 Pin Description The module has 29 pins [E2].\n\n• Module Overview The series comparison for the two modules is as follows: 1 Table 1-1 [E1].\n\n• Pin Definitions 3 Pin Definitions 3.1 Pin Layout The pin diagram below shows the approximate location of pins on the module [E3].\n\n• For the actual diagram drawn to scale, please refer to Figure 10.1 Physical Dimensions [E3].",
+      "method": "extractive",
+      "abstained": false,
+      "retrieval_confidence": 0.1817,
+      "reason": "",
+      "grounded": true,
+      "citations": [
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 4,
+          "chunk_id": "chk_554d50bbc1d9107814bbd23a631fe4da"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 10,
+          "chunk_id": "chk_fd66b9618aabd318ce11c3ff01d8fb0e"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 10,
+          "chunk_id": "chk_47af53e65ee1cfe81cb78384907d2bea"
+        }
+      ],
+      "elapsed_s": 0.0074
+    },
+    "Q5_distributed": {
+      "question": "What is the difference between the ESP32-C6-WROOM-1 and the ESP32-C6-WROOM-1U?",
+      "answer": "• Pin Layout (Top View) 3.2 Pin Description The module has 29 pins [E3].\n\n• Module Overview The series comparison for the two modules is as follows: 1 Table 1-1 [E1].",
+      "method": "extractive",
+      "abstained": false,
+      "retrieval_confidence": 0.3124,
+      "reason": "",
+      "grounded": true,
+      "citations": [
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 4,
+          "chunk_id": "chk_554d50bbc1d9107814bbd23a631fe4da"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 16,
+          "chunk_id": "chk_0c1f8279ffb6eee966acfae9dea93792"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 10,
+          "chunk_id": "chk_fd66b9618aabd318ce11c3ff01d8fb0e"
+        }
+      ],
+      "elapsed_s": 0.0074
+    },
+    "Q6_distributed": {
+      "question": "Which has a higher operating voltage: the MQ-5 sensor or the ESP32-C6-WROOM-1 module?",
+      "answer": "• Module Overview 1 Module Overview Note: Check the link or the QR code to make sure that you use the latest version of this document: https://espressif.com/documentation/esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf [E1].\n\n• The module does not include an external antenna upon shipment [E3].\n\n• Module Overview The series comparison for the two modules is as follows: 1 Table 1-1 [E2].\n\n• Specific requirements depend on the certification type.… [E3].",
+      "method": "extractive",
+      "abstained": false,
+      "retrieval_confidence": 0.2414,
+      "reason": "",
+      "grounded": true,
+      "citations": [
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 2,
+          "chunk_id": "chk_535afd7f496bbbb1cf7093077a6dad79"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 4,
+          "chunk_id": "chk_554d50bbc1d9107814bbd23a631fe4da"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 43,
+          "chunk_id": "chk_4370f50ecd99832b98fe85e630576b49"
+        }
+      ],
+      "elapsed_s": 0.0086
+    },
+    "Q7_numeric": {
+      "question": "What is the maximum heating consumption (power) of the MQ-5 sensor?",
+      "answer": "• Electrical Characteristics Note: The content below is excerpted from Section Current Consumption in Other Modes in ESP32-C6 Series Datasheet [E2].\n\n• Current Consumption in Other Modes Table 6-7 [E2].\n\n• Current Consumption in Modem-sleep Mode [E2].",
+      "method": "extractive",
+      "abstained": false,
+      "retrieval_confidence": 0.3196,
+      "reason": "",
+      "grounded": true,
+      "citations": [
+        {
+          "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+          "page": 1,
+          "chunk_id": "chk_70f20f66fd746437ae3e1aba561306de"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 28,
+          "chunk_id": "chk_1c276e7fe4de68bb6e3778ac139bbc90"
+        },
+        {
+          "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+          "page": 1,
+          "chunk_id": "chk_25b4dbadbbf3f2c01636440990f91d3b"
+        }
+      ],
+      "elapsed_s": 0.0074
+    },
+    "Q8_numeric": {
+      "question": "Up to how many MB of flash memory does the ESP32-C6-WROOM-1 support?",
+      "answer": "As fontes recuperadas não contêm uma passagem diretamente responsiva.",
+      "method": "abstention",
+      "abstained": true,
+      "retrieval_confidence": 0.196,
+      "reason": "no_supported_passage",
+      "grounded": null,
+      "citations": [
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 4,
+          "chunk_id": "chk_fd284c7d76f50b1cefefed42861d20a7"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 4,
+          "chunk_id": "chk_00499103d1f741ef32e7e9101904ea9a"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 50,
+          "chunk_id": "chk_d33a2284b2c0359519efb8426fecdf88"
+        }
+      ],
+      "elapsed_s": 0.0076
+    },
+    "Q9_negative": {
+      "question": "What is the retail price in US dollars of the MQ-5 sensor?",
+      "answer": "Não encontrei evidência suficiente nos documentos autorizados para responder com segurança.",
+      "method": "abstention",
+      "abstained": true,
+      "retrieval_confidence": 0.0809,
+      "reason": "retrieval_below_threshold",
+      "grounded": null,
+      "citations": [
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 13,
+          "chunk_id": "chk_2a2fc164dc8f44b958d2fe6aa175a727"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 13,
+          "chunk_id": "chk_9be7daa4db3a0362d7324b9b70dafe7a"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 16,
+          "chunk_id": "chk_f92092dd40e0475d918a1b4354335e04"
+        }
+      ],
+      "elapsed_s": 0.0076
+    },
+    "Q10_negative": {
+      "question": "Does the ESP32-C6-WROOM-1 support 5G cellular connectivity?",
+      "answer": "Não encontrei evidência suficiente nos documentos autorizados para responder com segurança.",
+      "method": "abstention",
+      "abstained": true,
+      "retrieval_confidence": 0.1688,
+      "reason": "retrieval_below_threshold",
+      "grounded": null,
+      "citations": [
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 4,
+          "chunk_id": "chk_554d50bbc1d9107814bbd23a631fe4da"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 10,
+          "chunk_id": "chk_fd66b9618aabd318ce11c3ff01d8fb0e"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 10,
+          "chunk_id": "chk_47af53e65ee1cfe81cb78384907d2bea"
+        }
+      ],
+      "elapsed_s": 0.008
+    }
+  },
+  "rag": {
+    "Q1_factual": {
+      "question": "What is the circuit voltage of the MQ-5 gas sensor?",
+      "answer": "• This pin does not have any internal pull resistors and the strapping value must be controlled by the external circuit that cannot be in a high impedance state [E2].\n\n• JTAG Signal Source Control The strapping pin GPIO15 can be used to control the source of JTAG signals during the early boot process [E2].",
+      "method": "extractive_fallback",
+      "abstained": false,
+      "retrieval_confidence": 0.2926,
+      "reason": "generated_answer_failed_grounding",
+      "grounded": true,
+      "citations": [
+        {
+          "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+          "page": 1,
+          "chunk_id": "chk_70f20f66fd746437ae3e1aba561306de"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 15,
+          "chunk_id": "chk_8416dcc1833f25c6be9765e69559442a"
+        },
+        {
+          "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+          "page": 1,
+          "chunk_id": "chk_25b4dbadbbf3f2c01636440990f91d3b"
+        }
+      ],
+      "elapsed_s": 0.1126
+    },
+    "Q2_factual": {
+      "question": "How many GPIOs does the ESP32-C6-WROOM-1 have?",
+      "answer": "Não encontrei evidência suficiente nos documentos autorizados para responder com segurança.",
+      "method": "abstention",
+      "abstained": true,
+      "retrieval_confidence": 0.1353,
+      "reason": "retrieval_below_threshold",
+      "grounded": null,
+      "citations": [
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 10,
+          "chunk_id": "chk_fd66b9618aabd318ce11c3ff01d8fb0e"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 4,
+          "chunk_id": "chk_4fa994d25ad1074b5551015d27e8e5c5"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 42,
+          "chunk_id": "chk_70e5d03946b816554314007eeabfa0ea"
+        }
+      ],
+      "elapsed_s": 0.0067
+    },
+    "Q3_semantic": {
+      "question": "What material is used in the gas sensing layer of the MQ-5?",
+      "answer": "• Gas sensing layer Electrode Electrode line Heater coil Tubular ceramic Anti-explosion | SnO2 Au Pt Ni-Cr alloy Al2O3 Stainless steel gauze | | | | | | | | | guration B | [E1].\n\n• JTAG Signal Source Control The strapping pin GPIO15 can be used to control the source of JTAG signals during the early boot process [E2].\n\n• The recommended setting for the RC delay circuit is usually R = 10 k and Ω C = 1 F [E3].\n\n• If you choose to solder it, please apply the correct amount of soldering paste [E3].",
+      "method": "extractive_fallback",
+      "abstained": false,
+      "retrieval_confidence": 0.4146,
+      "reason": "generated_answer_failed_grounding",
+      "grounded": true,
+      "citations": [
+        {
+          "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+          "page": 1,
+          "chunk_id": "chk_8d9954c17773f4897265fef39f648b05"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 15,
+          "chunk_id": "chk_8416dcc1833f25c6be9765e69559442a"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 40,
+          "chunk_id": "chk_7580c08dc4839d5f567d589516c99034"
+        }
+      ],
+      "elapsed_s": 0.2981
+    },
+    "Q4_semantic": {
+      "question": "What operating ambient temperature range does the ESP32-C6-WROOM-1 module support?",
+      "answer": "• Pin Layout (Top View) 3.2 Pin Description The module has 29 pins [E2].\n\n• Module Overview The series comparison for the two modules is as follows: 1 Table 1-1 [E1].\n\n• Pin Definitions 3 Pin Definitions 3.1 Pin Layout The pin diagram below shows the approximate location of pins on the module [E3].\n\n• For the actual diagram drawn to scale, please refer to Figure 10.1 Physical Dimensions [E3].",
+      "method": "extractive_fallback",
+      "abstained": false,
+      "retrieval_confidence": 0.1817,
+      "reason": "generated_answer_failed_grounding",
+      "grounded": true,
+      "citations": [
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 4,
+          "chunk_id": "chk_554d50bbc1d9107814bbd23a631fe4da"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 10,
+          "chunk_id": "chk_fd66b9618aabd318ce11c3ff01d8fb0e"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 10,
+          "chunk_id": "chk_47af53e65ee1cfe81cb78384907d2bea"
+        }
+      ],
+      "elapsed_s": 0.2903
+    },
+    "Q5_distributed": {
+      "question": "What is the difference between the ESP32-C6-WROOM-1 and the ESP32-C6-WROOM-1U?",
+      "answer": "• Pin Layout (Top View) 3.2 Pin Description The module has 29 pins [E3].\n\n• Module Overview The series comparison for the two modules is as follows: 1 Table 1-1 [E1].",
+      "method": "extractive_fallback",
+      "abstained": false,
+      "retrieval_confidence": 0.3124,
+      "reason": "generated_answer_failed_grounding",
+      "grounded": true,
+      "citations": [
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 4,
+          "chunk_id": "chk_554d50bbc1d9107814bbd23a631fe4da"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 16,
+          "chunk_id": "chk_0c1f8279ffb6eee966acfae9dea93792"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 10,
+          "chunk_id": "chk_fd66b9618aabd318ce11c3ff01d8fb0e"
+        }
+      ],
+      "elapsed_s": 0.2649
+    },
+    "Q6_distributed": {
+      "question": "Which has a higher operating voltage: the MQ-5 sensor or the ESP32-C6-WROOM-1 module?",
+      "answer": "• Module Overview 1 Module Overview Note: Check the link or the QR code to make sure that you use the latest version of this document: https://espressif.com/documentation/esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf [E1].\n\n• The module does not include an external antenna upon shipment [E3].\n\n• Module Overview The series comparison for the two modules is as follows: 1 Table 1-1 [E2].\n\n• Specific requirements depend on the certification type.… [E3].",
+      "method": "extractive_fallback",
+      "abstained": false,
+      "retrieval_confidence": 0.2414,
+      "reason": "generated_answer_failed_grounding",
+      "grounded": true,
+      "citations": [
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 2,
+          "chunk_id": "chk_535afd7f496bbbb1cf7093077a6dad79"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 4,
+          "chunk_id": "chk_554d50bbc1d9107814bbd23a631fe4da"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 43,
+          "chunk_id": "chk_4370f50ecd99832b98fe85e630576b49"
+        }
+      ],
+      "elapsed_s": 0.271
+    },
+    "Q7_numeric": {
+      "question": "What is the maximum heating consumption (power) of the MQ-5 sensor?",
+      "answer": "• Electrical Characteristics Note: The content below is excerpted from Section Current Consumption in Other Modes in ESP32-C6 Series Datasheet [E2].\n\n• Current Consumption in Other Modes Table 6-7 [E2].\n\n• Current Consumption in Modem-sleep Mode [E2].",
+      "method": "extractive_fallback",
+      "abstained": false,
+      "retrieval_confidence": 0.3196,
+      "reason": "generated_answer_failed_grounding",
+      "grounded": true,
+      "citations": [
+        {
+          "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+          "page": 1,
+          "chunk_id": "chk_70f20f66fd746437ae3e1aba561306de"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 28,
+          "chunk_id": "chk_1c276e7fe4de68bb6e3778ac139bbc90"
+        },
+        {
+          "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+          "page": 1,
+          "chunk_id": "chk_25b4dbadbbf3f2c01636440990f91d3b"
+        }
+      ],
+      "elapsed_s": 0.2682
+    },
+    "Q8_numeric": {
+      "question": "Up to how many MB of flash memory does the ESP32-C6-WROOM-1 support?",
+      "answer": "As fontes recuperadas não contêm uma passagem diretamente responsiva.",
+      "method": "abstention",
+      "abstained": true,
+      "retrieval_confidence": 0.196,
+      "reason": "no_supported_passage",
+      "grounded": null,
+      "citations": [
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 4,
+          "chunk_id": "chk_fd284c7d76f50b1cefefed42861d20a7"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 4,
+          "chunk_id": "chk_00499103d1f741ef32e7e9101904ea9a"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 50,
+          "chunk_id": "chk_d33a2284b2c0359519efb8426fecdf88"
+        }
+      ],
+      "elapsed_s": 0.0068
+    },
+    "Q9_negative": {
+      "question": "What is the retail price in US dollars of the MQ-5 sensor?",
+      "answer": "Não encontrei evidência suficiente nos documentos autorizados para responder com segurança.",
+      "method": "abstention",
+      "abstained": true,
+      "retrieval_confidence": 0.0809,
+      "reason": "retrieval_below_threshold",
+      "grounded": null,
+      "citations": [
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 13,
+          "chunk_id": "chk_2a2fc164dc8f44b958d2fe6aa175a727"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 13,
+          "chunk_id": "chk_9be7daa4db3a0362d7324b9b70dafe7a"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 16,
+          "chunk_id": "chk_f92092dd40e0475d918a1b4354335e04"
+        }
+      ],
+      "elapsed_s": 0.0128
+    },
+    "Q10_negative": {
+      "question": "Does the ESP32-C6-WROOM-1 support 5G cellular connectivity?",
+      "answer": "Não encontrei evidência suficiente nos documentos autorizados para responder com segurança.",
+      "method": "abstention",
+      "abstained": true,
+      "retrieval_confidence": 0.1688,
+      "reason": "retrieval_below_threshold",
+      "grounded": null,
+      "citations": [
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 4,
+          "chunk_id": "chk_554d50bbc1d9107814bbd23a631fe4da"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 10,
+          "chunk_id": "chk_fd66b9618aabd318ce11c3ff01d8fb0e"
+        },
+        {
+          "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+          "page": 10,
+          "chunk_id": "chk_47af53e65ee1cfe81cb78384907d2bea"
+        }
+      ],
+      "elapsed_s": 0.0079
+    }
+  }
+}

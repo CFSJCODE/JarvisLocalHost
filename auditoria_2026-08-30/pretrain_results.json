@@ -1,0 +1,302 @@
+{
+  "Q1_factual": {
+    "question": "What is the circuit voltage of the MQ-5 gas sensor?",
+    "answer": "• Stable and long life * Simple drive circuit APPLICATION They are used in gas leakage detecting equipments in family and industry, are suitable for detecting of LPG, natural gas , town gas, avoid the noise of alcohol and cooking fumes and cigarette smoke [E1].\n\n• Configuration Configuration A B A A 向 向 Structure and configuration of MQ-5 gas sensor is shown as Fig [E3].\n\n• HANWEI ELECTRONICS CO.,LTD MQ-5 http://www.hwsensor.com TECHNICAL DATA MQ5 GAS SENSOR FEATURES * High sensitivity to LPG, natural gas , town gas * Small sensitivity to alcohol, smoke [E1].\n\n• Ω Ω Ω 2 L When accurately measuring, the proper alarm point for the gas detector should be determined after considering the temperature and humidity influence [E2].",
+    "mode": "strict",
+    "method": "extractive",
+    "abstained": false,
+    "retrieval_confidence": 0.5606,
+    "reason": "",
+    "citations": [
+      {
+        "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+        "page": 1,
+        "chunk_id": "chk_ae435182eaffd4253db86e2cc7202fab",
+        "quote": "HANWEI ELECTRONICS CO.,LTD MQ-5 http://www.hwsensor.com TECHNICAL DATA MQ- 5 GAS SENSOR FEATURES * High sensitivity to LPG, natural gas , town gas * S"
+      },
+      {
+        "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+        "page": 2,
+        "chunk_id": "chk_6dd7427410c5826ebccbfca66c8366fa",
+        "quote": "1.4 Ro: sensor resistance at 1000ppm of H in air at 2 1.3 33%RH and 20 degree. 33%RH 1.2 Rs: sensor resistance at different temperatures 1.1 85%RH Rs/"
+      },
+      {
+        "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+        "page": 1,
+        "chunk_id": "chk_cb24b7d215e3883bd51fb75720177d89",
+        "quote": "Parts Materials 1 Gas sensing SnO 2 layer 2 Electrode Au 3 Electrode line Pt 4 Heater coil Ni-Cr alloy 5 Tubular ceramic Al O 2 3 6 Anti-explosion Sta"
+      }
+    ],
+    "elapsed_s": 0.0035
+  },
+  "Q2_factual": {
+    "question": "How many GPIOs does the ESP32-C6-WROOM-1 have?",
+    "answer": "• ESP32-C6 Hardware Design Guidelines – Guidelines on how to integrate the ESP32-C6 into your hardware prod- • uct [E2].\n\n• ESP32-C6 Technical Reference Manual – Detailed information on how to use the ESP32-C6 memory and periph- • erals [E2].\n\n• This pin does not have any internal pull resistors and the strapping value must be controlled by the external circuit that cannot be in a high impedance state [E3].\n\n• Related Documentation and Resources Related Documentation and Resources Related Documentation ESP32-C6 Series Datasheet – Specifications of the ESP32-C6 hardware [E2].",
+    "mode": "strict",
+    "method": "extractive",
+    "abstained": false,
+    "retrieval_confidence": 0.2932,
+    "reason": "",
+    "citations": [
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 9,
+        "chunk_id": "chk_389007c5b54d8290ea55fc402e433828",
+        "quote": "2 Block Diagram 2 Block Diagram 40 MHz Crystal 3V3 Antenna RF Matching EN ESP32-C6 GPIOs VDD_SPI SPICS0 SPICLK SPIWP SPIHD SPIQ SPID GND QSPI Flash Fi"
+      },
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 49,
+        "chunk_id": "chk_67e68f4fb91d257ae39e1afb188d1d97",
+        "quote": "Related Documentation and Resources Related Documentation and Resources Related Documentation ESP32-C6 Series Datasheet – Specifications of the ESP32-"
+      },
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 15,
+        "chunk_id": "chk_8416dcc1833f25c6be9765e69559442a",
+        "quote": "4.4 JTAG Signal Source Control The strapping pin GPIO15 can be used to control the source of JTAG signals during the early boot process. This pin does"
+      }
+    ],
+    "elapsed_s": 0.0023
+  },
+  "Q3_semantic": {
+    "question": "What material is used in the gas sensing layer of the MQ-5?",
+    "answer": "• Gas sensing layer Electrode Electrode line Heater coil Tubular ceramic Anti-explosion | SnO2 Au Pt Ni-Cr alloy Al2O3 Stainless steel gauze | | | | | | | | | guration B | [E1].\n\n• Parts Materials 1 Gas sensing SnO 2 layer 2 Electrode Au 3 Electrode line Pt 4 Heater coil Ni-Cr alloy 5 Tubular ceramic Al O 2 3 6 Anti-explosion Stainless steel gauze network (SUS316 100-mesh) 7 Clamp ring Copper plating Ni 8 Resin base Bakelite 9 Tube Pin Copper plating Ni Fig.2 Fig [E3].\n\n• Stable and long life * Simple drive circuit APPLICATION They are used in gas leakage detecting equipments in family and industry, are suitable for detecting of LPG, natural gas , town gas, avoid the noise of alcohol and cooking fumes and cigarette smoke [E2].\n\n• Configuration Configuration A B A A 向 向 Structure and configuration of MQ-5 gas sensor is shown as Fig [E3].",
+    "mode": "strict",
+    "method": "extractive",
+    "abstained": false,
+    "retrieval_confidence": 0.4146,
+    "reason": "",
+    "citations": [
+      {
+        "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+        "page": 1,
+        "chunk_id": "chk_8d9954c17773f4897265fef39f648b05",
+        "quote": "| | | Fig.2 Fig. 1 | | | | --- | --- | --- | --- | --- | | Gas sensing layer Electrode Electrode line Heater coil Tubular ceramic Anti-explosion | SnO"
+      },
+      {
+        "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+        "page": 1,
+        "chunk_id": "chk_ae435182eaffd4253db86e2cc7202fab",
+        "quote": "HANWEI ELECTRONICS CO.,LTD MQ-5 http://www.hwsensor.com TECHNICAL DATA MQ- 5 GAS SENSOR FEATURES * High sensitivity to LPG, natural gas , town gas * S"
+      },
+      {
+        "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+        "page": 1,
+        "chunk_id": "chk_cb24b7d215e3883bd51fb75720177d89",
+        "quote": "Parts Materials 1 Gas sensing SnO 2 layer 2 Electrode Au 3 Electrode line Pt 4 Heater coil Ni-Cr alloy 5 Tubular ceramic Al O 2 3 6 Anti-explosion Sta"
+      }
+    ],
+    "elapsed_s": 0.0019
+  },
+  "Q4_semantic": {
+    "question": "What operating ambient temperature range does the ESP32-C6-WROOM-1 module support?",
+    "answer": "• Ambient temperature specifies the recommended temperature range of the environment immediately outside the Espressif module [E1].\n\n• By default, the SPI flash on the module operates at a maximum clock frequency of 80 MHz and does not support the auto suspend feature [E1].\n\n• Temperature Sensor The Temperature Sensor in the ESP32-C6 chip allows for real-time monitoring of temperature changes inside the chip [E2].\n\n• At the core of the modules is ESP32-C6, a 32-bit RISC-V single-core processor [E1].",
+    "mode": "strict",
+    "method": "extractive",
+    "abstained": false,
+    "retrieval_confidence": 0.6681,
+    "reason": "",
+    "citations": [
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 4,
+        "chunk_id": "chk_33c5e02d25389e1f5518006786629547",
+        "quote": "Ambient Temp. Size 2,3 Part Number Flash (°C) (mm) ESP32-C6-WROOM-1U-N4 4 MB (Quad SPI) ESP32-C6-WROOM-1U-N8 8 MB (Quad SPI) –40 85 18.0 × 19.2 × 3.2 "
+      },
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 25,
+        "chunk_id": "chk_08dac3c97e5505c9245b0d6d2d7affbc",
+        "quote": "5 Peripherals Threshold monitoring which helps to trigger an interrupt • Support for Event T ask Matrix • Pin Assignment For details, see ESP32-C6 Ser"
+      },
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 3,
+        "chunk_id": "chk_270d9d813af142902c7a2e437d173784",
+        "quote": "1 Module Overview Internal co-existence mechanism between Wi-Fi Integrated Components on Module • and Bluetooth to share the same antenna 40 MHz cryst"
+      }
+    ],
+    "elapsed_s": 0.0029
+  },
+  "Q5_distributed": {
+    "question": "What is the difference between the ESP32-C6-WROOM-1 and the ESP32-C6-WROOM-1U?",
+    "answer": "• ESP32-C6-WROOM-1U comes with a connector for an external antenna [E3].\n\n• The rich set of peripherals and high performance make the module an ideal choice for smart homes, industrial automation, health care, consumer electronics, etc [E3].\n\n• Block Diagram 2 Block Diagram 40 MHz Crystal 3V3 Antenna RF Matching EN ESP32-C6 GPIOs VDD_SPI SPICS0 SPICLK SPIWP SPIHD SPIQ SPID GND QSPI Flash Figure 2-1 [E1].",
+    "mode": "strict",
+    "method": "extractive",
+    "abstained": false,
+    "retrieval_confidence": 0.4873,
+    "reason": "",
+    "citations": [
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 9,
+        "chunk_id": "chk_389007c5b54d8290ea55fc402e433828",
+        "quote": "2 Block Diagram 2 Block Diagram 40 MHz Crystal 3V3 Antenna RF Matching EN ESP32-C6 GPIOs VDD_SPI SPICS0 SPICLK SPIWP SPIHD SPIQ SPID GND QSPI Flash Fi"
+      },
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 51,
+        "chunk_id": "chk_57dedb37081dded52a7b0cff27178f20",
+        "quote": "Date Version Release notes Updated the vector picture of ESP32-C6-WROOM-1U on the titlepage to • remove the castellated pins at the bottom In Section "
+      },
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 3,
+        "chunk_id": "chk_0486811883735a85cad9cd08c46bad6e",
+        "quote": "1.2 Series Comparison ESP32-C6-WROOM-1 and ESP32-C6-WROOM-1U are two powerful, general-purpose Wi-Fi, IEEE 802.15.4, and Bluetooth LE modules. The ric"
+      }
+    ],
+    "elapsed_s": 0.0023
+  },
+  "Q6_distributed": {
+    "question": "Which has a higher operating voltage: the MQ-5 sensor or the ESP32-C6-WROOM-1 module?",
+    "answer": "• Pin Layout (Top View) 3.2 Pin Description The module has 29 pins [E2].\n\n• Temperature Sensor The Temperature Sensor in the ESP32-C6 chip allows for real-time monitoring of temperature changes inside the chip [E3].\n\n• Peripherals Threshold monitoring which helps to trigger an interrupt • Support for Event T ask Matrix • Pin Assignment For details, see ESP32-C6 Series Datasheet > Section Peripheral Pin Assignment [E3].",
+    "mode": "strict",
+    "method": "extractive",
+    "abstained": false,
+    "retrieval_confidence": 0.5337,
+    "reason": "",
+    "citations": [
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 3,
+        "chunk_id": "chk_270d9d813af142902c7a2e437d173784",
+        "quote": "1 Module Overview Internal co-existence mechanism between Wi-Fi Integrated Components on Module • and Bluetooth to share the same antenna 40 MHz cryst"
+      },
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 10,
+        "chunk_id": "chk_fd66b9618aabd318ce11c3ff01d8fb0e",
+        "quote": "Pin Layout (Top View) 3.2 Pin Description The module has 29 pins. See pin definitions in T able 3-1 Pin Definitions . Espressif Systems 10 ESP32-C6-WR"
+      },
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 25,
+        "chunk_id": "chk_08dac3c97e5505c9245b0d6d2d7affbc",
+        "quote": "5 Peripherals Threshold monitoring which helps to trigger an interrupt • Support for Event T ask Matrix • Pin Assignment For details, see ESP32-C6 Ser"
+      }
+    ],
+    "elapsed_s": 0.002
+  },
+  "Q7_numeric": {
+    "question": "What is the maximum heating consumption (power) of the MQ-5 sensor?",
+    "answer": "• RX current consumption is rated when the peripherals are disabled and the CPU idle [E3].\n\n• Current Consumption Characteristics 6.4.1 Current Consumption in Active Mode The current consumption measurements are taken with a 3.3 V supply at 25 °C ambient temperature [E3].\n\n• TX current consumption is rated at a 100% duty cycle [E3].\n\n• Current Consumption for Wi-Fi (2.4 GHz) in Active Mode [E3].",
+    "mode": "strict",
+    "method": "extractive",
+    "abstained": false,
+    "retrieval_confidence": 0.3204,
+    "reason": "",
+    "citations": [
+      {
+        "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+        "page": 1,
+        "chunk_id": "chk_25b4dbadbbf3f2c01636440990f91d3b",
+        "quote": "| Symbol | Parameter name | Technical condition | Remarks | | --- | --- | --- | --- | | Vc | Circuit voltage | 5V ±0.1 | AC OR DC | | V H | Heating vo"
+      },
+      {
+        "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+        "page": 1,
+        "chunk_id": "chk_70f20f66fd746437ae3e1aba561306de",
+        "quote": "Vc Circuit voltage 5V±0.1 AC OR DC V Heating voltage 5V±0.1 ACOR DC H P Load resistance 20K Ω L R Heater resistance Room Tem 31 10% ± H P Heating cons"
+      },
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 27,
+        "chunk_id": "chk_ea49493097ea8268b5c390461f96859a",
+        "quote": "6.4 Current Consumption Characteristics 6.4.1 Current Consumption in Active Mode The current consumption measurements are taken with a 3.3 V supply at"
+      }
+    ],
+    "elapsed_s": 0.0015
+  },
+  "Q8_numeric": {
+    "question": "Up to how many MB of flash memory does the ESP32-C6-WROOM-1 support?",
+    "answer": "• ESP32-C6 Technical Reference Manual – Detailed information on how to use the ESP32-C6 memory and periph- • erals [E1].\n\n• By default, the SPI flash on the module operates at a maximum clock frequency of 80 MHz and does not support the auto suspend feature [E2].\n\n• ESP32-C6 Hardware Design Guidelines – Guidelines on how to integrate the ESP32-C6 into your hardware prod- • uct [E1].\n\n• At the core of the modules is ESP32-C6, a 32-bit RISC-V single-core processor [E2].",
+    "mode": "strict",
+    "method": "extractive",
+    "abstained": false,
+    "retrieval_confidence": 0.476,
+    "reason": "",
+    "citations": [
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 49,
+        "chunk_id": "chk_67e68f4fb91d257ae39e1afb188d1d97",
+        "quote": "Related Documentation and Resources Related Documentation and Resources Related Documentation ESP32-C6 Series Datasheet – Specifications of the ESP32-"
+      },
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 4,
+        "chunk_id": "chk_33c5e02d25389e1f5518006786629547",
+        "quote": "Ambient Temp. Size 2,3 Part Number Flash (°C) (mm) ESP32-C6-WROOM-1U-N4 4 MB (Quad SPI) ESP32-C6-WROOM-1U-N8 8 MB (Quad SPI) –40 85 18.0 × 19.2 × 3.2 "
+      },
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 28,
+        "chunk_id": "chk_a0bb2b3dc043246286fe1e4578af0058",
+        "quote": "6.5 Memory Specifications The data below is sourced from the memory vendor datasheet. These values are guaranteed through design and/or characterizati"
+      }
+    ],
+    "elapsed_s": 0.0025
+  },
+  "Q9_negative": {
+    "question": "What is the retail price in US dollars of the MQ-5 sensor?",
+    "answer": "• Temperature Sensor The Temperature Sensor in the ESP32-C6 chip allows for real-time monitoring of temperature changes inside the chip [E2].\n\n• Rs:sensor resistance at various 1 concentrations of gases [E1].\n\n• sensitivity characteristics of the MQ-5 for several gases [E1].\n\n• Ω Ω Ω 2 L When accurately measuring, the proper alarm point for the gas detector should be determined after considering the temperature and humidity influence [E3].",
+    "mode": "strict",
+    "method": "extractive",
+    "abstained": false,
+    "retrieval_confidence": 0.1881,
+    "reason": "",
+    "citations": [
+      {
+        "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+        "page": 2,
+        "chunk_id": "chk_a6e4abc3facb5495ec549d2ac89bfbd2",
+        "quote": "sensitivity characteristics of the MQ-5 for several gases. in their: Temp: 20 ℃、 Humidity: 65% 、 O concentration 21% 2 RL=20k Ω Ro: sensor resistance "
+      },
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 25,
+        "chunk_id": "chk_08dac3c97e5505c9245b0d6d2d7affbc",
+        "quote": "5 Peripherals Threshold monitoring which helps to trigger an interrupt • Support for Event T ask Matrix • Pin Assignment For details, see ESP32-C6 Ser"
+      },
+      {
+        "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+        "page": 2,
+        "chunk_id": "chk_6dd7427410c5826ebccbfca66c8366fa",
+        "quote": "1.4 Ro: sensor resistance at 1000ppm of H in air at 2 1.3 33%RH and 20 degree. 33%RH 1.2 Rs: sensor resistance at different temperatures 1.1 85%RH Rs/"
+      }
+    ],
+    "elapsed_s": 0.002
+  },
+  "Q10_negative": {
+    "question": "Does the ESP32-C6-WROOM-1 support 5G cellular connectivity?",
+    "answer": "• By default, the SPI flash on the module operates at a maximum clock frequency of 80 MHz and does not support the auto suspend feature [E2].\n\n• At the core of the modules is ESP32-C6, a 32-bit RISC-V single-core processor [E2].\n\n• UART Controller The UART Controller in the ESP32-C6 chip facilitates the transmission and reception of asynchronous serial data between the chip and external UART devices [E1].\n\n• Peripheral Description This section describes the chip’s peripheral capabilities, covering connectivity interfaces and on-chip sensors that extend its functionality [E1].",
+    "mode": "strict",
+    "method": "extractive",
+    "abstained": false,
+    "retrieval_confidence": 0.5202,
+    "reason": "",
+    "citations": [
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 17,
+        "chunk_id": "chk_c2230c2937b0aa309ac113fd5186045b",
+        "quote": "5.2 Peripheral Description This section describes the chip’s peripheral capabilities, covering connectivity interfaces and on-chip sensors that extend"
+      },
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 4,
+        "chunk_id": "chk_33c5e02d25389e1f5518006786629547",
+        "quote": "Ambient Temp. Size 2,3 Part Number Flash (°C) (mm) ESP32-C6-WROOM-1U-N4 4 MB (Quad SPI) ESP32-C6-WROOM-1U-N8 8 MB (Quad SPI) –40 85 18.0 × 19.2 × 3.2 "
+      },
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 20,
+        "chunk_id": "chk_043a016791635c82a814d8785b5fcb3f",
+        "quote": "convenient method for JTAG debugging. It eliminates the need for external chips or JTAG adapters, saving space and reducing cost. Feature List USB 2.0"
+      }
+    ],
+    "elapsed_s": 0.0028
+  }
+}

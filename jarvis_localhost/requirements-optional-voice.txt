@@ -1,0 +1,3 @@
+# Optional operating-system speech output. It does not add factual knowledge,
+# but sovereign mode disables it unless an explicitly relaxed policy allows it.
+pyttsx3==2.90
