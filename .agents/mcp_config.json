@@ -1,0 +1,30 @@
+{
+  "mcpServers": {
+    "codex": {
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "E:\\SoftwareProjects\\JarvisLocalHost\\.agents\\launch-codex-mcp.ps1"
+      ],
+      "cwd": "E:\\SoftwareProjects\\JarvisLocalHost",
+      "disabled": false,
+      "disabledTools": []
+    },
+    "jarvis-team-bus": {
+      "command": "powershell.exe",
+      "args": [
+        "-NoProfile",
+        "-ExecutionPolicy",
+        "Bypass",
+        "-File",
+        "E:\\SoftwareProjects\\JarvisLocalHost\\.agents\\launch-team-bus.ps1"
+      ],
+      "cwd": "E:\\SoftwareProjects\\JarvisLocalHost",
+      "disabled": false,
+      "disabledTools": []
+    }
+  }
+}

@@ -56,3 +56,15 @@ O frontend principal e `jarvis_localhost/web/static/index.html`. Ele conversa co
 O offload por cluster fica desativado por padrao e deve ser habilitado por variaveis `JARVIS_CLUSTER_*`. A voz offline tambem fica desativada por padrao e usa `JARVIS_VOICE_ENABLED`.
 
 Esses recursos devem falhar de forma controlada quando a dependencia local nao existir.
+
+## Logging
+
+`jarvis_localhost/logging_config.py` centraliza a configuracao do logger `jarvis` (console + arquivo rotativo em `data/logs/jarvis.log`, nivel via `JARVIS_LOG_LEVEL`). `server/app.py` chama `configure_logging()` na importacao do modulo; `core/brain.py`, `processing/pdf_processor.py` e `storage/database.py` usam `get_logger(__name__)`, que automaticamente vira um filho do logger `jarvis` (ex.: `jarvis.core.brain`) e portanto herda os mesmos handlers. As excecoes deliberadas (scripts CLI em `tools/`, o servidor MCP `integrations/team_bus_server.py`, e o codigo morto `legacy/engine_AI_legacy.py`) estao documentadas em DEVELOPMENT.md, secao "Continuacao Da Auditoria Tecnica".
+
+## Ferramentas De Manutencao
+
+`jarvis_localhost/tools/corpus_hygiene.py` detecta (e, com `--fix`, remove) documentos com zero chunks no `corpus_manifest.json` — ver `PDFProcessor`/`EmptyDocumentError` abaixo. `jarvis_localhost/tools/hardware_probe.py` e `directml_smoke.py` inspecionam hardware/backend sem tocar dados do usuario.
+
+## Invariante: Documentos Com Zero Chunks
+
+`processing/pdf_processor.py` levanta `EmptyDocumentError` (e nao persiste nada) quando um PDF nao produz nenhum chunk canonico (sem camada de texto, sem tabelas, sem OCR) — independente do modo soberano estar ligado ou desligado. Antes dessa checagem existir, tal documento podia ser gravado como uma entrada valida porem vazia no manifesto ("documento fantasma"); `tools/corpus_hygiene.py` ajuda a limpar entradas desse tipo que já existam de uma versao anterior.

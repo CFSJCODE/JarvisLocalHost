@@ -11,12 +11,15 @@ from __future__ import annotations
 import ipaddress
 import json
 import os
+import re
 import socket
 from dataclasses import dataclass, field
 from typing import Any, Dict, List, Optional
 from urllib.error import HTTPError, URLError
 from urllib.parse import urljoin, urlparse
 from urllib.request import Request, urlopen
+
+from jarvis_localhost.sovereign import POLICY, SovereignModeViolation
 
 
 TRUTHY = {"1", "true", "yes", "on", "sim"}
@@ -37,6 +40,29 @@ DEFAULT_DENIED_FRAGMENTS = (
     "passwd",
     ":(){",
 )
+SHELL_EXECUTABLES = frozenset(
+    {
+        "bash",
+        "cmd",
+        "cmd.exe",
+        "command.com",
+        "csh",
+        "dash",
+        "fish",
+        "ksh",
+        "powershell",
+        "powershell.exe",
+        "pwsh",
+        "pwsh.exe",
+        "sh",
+        "wsl",
+        "wsl.exe",
+        "zsh",
+    }
+)
+EVAL_FLAGS = frozenset({"-c", "/c", "--command", "-e", "--eval", "-m"})
+PYTHON_EXECUTABLES = frozenset({"python", "python.exe", "python3", "python3.exe", "py", "py.exe"})
+SAFE_TOKEN_PUNCTUATION = frozenset("_./:\\=,+@-")
 
 
 class ClusterError(RuntimeError):
@@ -108,13 +134,15 @@ def _is_private_host(hostname: str) -> bool:
         return False
 
 
-def _split_command_segments(command: str) -> List[str]:
-    segments: List[str] = []
-    for line in command.splitlines():
-        for part in line.split(";"):
-            for and_part in part.split("&&"):
-                segments.extend(and_part.split("||"))
-    return [segment.strip() for segment in segments if segment.strip()]
+def _is_safe_command_token(token: str) -> bool:
+    return bool(token) and all(
+        character.isalnum() or character in SAFE_TOKEN_PUNCTUATION
+        for character in token
+    )
+
+
+def _executable_basename(executable: str) -> str:
+    return executable.replace("\\", "/").rsplit("/", 1)[-1].casefold()
 
 
 class ClusterClient:
@@ -123,8 +151,25 @@ class ClusterClient:
     def __init__(self, config: ClusterConfig):
         self.config = config
         parsed = urlparse(config.base_url)
-        if parsed.scheme not in {"http", "https"} or not parsed.netloc:
+        if (
+            parsed.scheme not in {"http", "https"}
+            or not parsed.netloc
+            or parsed.username
+            or parsed.password
+            or parsed.query
+            or parsed.fragment
+        ):
             raise ClusterSecurityError("JARVIS_CLUSTER_URL inválida.")
+        try:
+            parsed.port
+        except ValueError:
+            raise ClusterSecurityError("JARVIS_CLUSTER_URL inválida.") from None
+        try:
+            POLICY.assert_url_allowed(config.base_url)
+        except SovereignModeViolation:
+            raise ClusterSecurityError(
+                "Cluster externo bloqueado pela política soberana."
+            ) from None
         if not config.allow_remote and not _is_private_host(parsed.hostname or ""):
             raise ClusterSecurityError(
                 "Cluster remoto bloqueado. Use localhost/LAN ou defina "
@@ -154,9 +199,13 @@ class ClusterClient:
 
     @property
     def enabled(self) -> bool:
-        return self.config.enabled
+        return self.config.enabled and not POLICY.enabled
 
     def _ensure_enabled(self) -> None:
+        if POLICY.enabled:
+            raise ClusterDisabled(
+                "Execução de comandos de cluster desativada no modo soberano."
+            )
         if not self.config.enabled:
             raise ClusterDisabled(
                 "Cluster Aether desativado. Configure JARVIS_CLUSTER_ENABLED=1 "
@@ -184,17 +233,23 @@ class ClusterClient:
             with urlopen(request, timeout=self.config.timeout_seconds) as response:
                 raw = response.read().decode("utf-8")
         except HTTPError as exc:
-            detail = exc.read().decode("utf-8", errors="replace")
-            raise ClusterError(f"Aether HTTP {exc.code}: {detail}") from exc
-        except URLError as exc:
-            raise ClusterError(f"Aether indisponível: {exc.reason}") from exc
+            raise ClusterError(f"Aether respondeu com HTTP {exc.code}.") from None
+        except URLError:
+            raise ClusterError("Aether indisponível.") from None
 
-        return json.loads(raw) if raw else {}
+        try:
+            return json.loads(raw) if raw else {}
+        except json.JSONDecodeError:
+            raise ClusterError("Aether retornou uma resposta inválida.") from None
 
-    def validate_command(self, command: str) -> None:
+    def _validated_command(self, command: str) -> tuple[str, str, List[str]]:
         stripped = command.strip()
         if not stripped:
             raise ClusterSecurityError("Comando vazio.")
+        if stripped != " ".join(stripped.split()) or any(
+            character in stripped for character in "\r\n\t"
+        ):
+            raise ClusterSecurityError("Comando deve usar um formato simples e estruturado.")
 
         lower = stripped.lower()
         for fragment in self.config.denied_fragments:
@@ -205,22 +260,61 @@ class ClusterClient:
         if not allowed:
             raise ClusterSecurityError("Nenhum prefixo permitido configurado.")
 
-        for segment in _split_command_segments(stripped):
-            normalized = segment.lower()
-            if not any(
-                normalized == prefix or normalized.startswith(prefix + " ")
-                for prefix in allowed
+        tokens = stripped.split(" ")
+        if not all(_is_safe_command_token(token) for token in tokens):
+            raise ClusterSecurityError("Comando contém caracteres de shell bloqueados.")
+
+        executable, args = tokens[0], tokens[1:]
+        if executable.casefold() not in allowed:
+            raise ClusterSecurityError("Executável fora da allowlist local do Jarvis.")
+
+        executable_name = _executable_basename(executable)
+        if executable_name in SHELL_EXECUTABLES:
+            raise ClusterSecurityError("Interpretadores de shell não são permitidos.")
+        if any(argument.casefold() in EVAL_FLAGS for argument in args):
+            raise ClusterSecurityError("Execução dinâmica de código não é permitida.")
+        if executable_name not in PYTHON_EXECUTABLES and any(
+            argument.casefold().startswith(("-c", "-e", "--command=", "--eval="))
+            for argument in args
+        ):
+            raise ClusterSecurityError("Execução dinâmica de código não é permitida.")
+
+        if executable_name in PYTHON_EXECUTABLES:
+            python_args = list(args)
+            if executable_name in {"py", "py.exe"} and python_args:
+                if re.fullmatch(r"-\d+(?:\.\d+)?(?:-\d+)?", python_args[0]):
+                    python_args.pop(0)
+            if not python_args:
+                raise ClusterSecurityError("Um script Python explícito é obrigatório.")
+            script = python_args[0]
+            normalized_script = script.replace("\\", "/")
+            if (
+                not script.casefold().endswith(".py")
+                or script.startswith("-")
+                or normalized_script.startswith("/")
+                or re.match(r"^[A-Za-z]:", normalized_script)
+                or ".." in normalized_script.split("/")
             ):
                 raise ClusterSecurityError(
-                    f"Segmento fora da allowlist local do Jarvis: {segment}"
+                    "Somente scripts Python relativos e explícitos são permitidos."
                 )
 
+        canonical = " ".join(tokens)
+        return canonical, executable, args
+
+    def validate_command(self, command: str) -> None:
+        self._validated_command(command)
+
     def status(self) -> Dict[str, Any]:
-        if not self.config.enabled:
+        if not self.enabled:
             return {
                 "enabled": False,
                 "base_url": self.config.base_url,
-                "message": "Cluster Aether desativado.",
+                "message": (
+                    "Cluster Aether desativado no modo soberano."
+                    if POLICY.enabled
+                    else "Cluster Aether desativado."
+                ),
             }
         try:
             return {
@@ -237,7 +331,7 @@ class ClusterClient:
             }
 
     def workers(self) -> Dict[str, Any]:
-        if not self.config.enabled:
+        if not self.enabled:
             return {"enabled": False, "workers": []}
         try:
             return {"enabled": True, "workers": self._request_json("/api/workers")}
@@ -245,7 +339,7 @@ class ClusterClient:
             return {"enabled": True, "workers": [], "error": str(exc)}
 
     def tasks(self) -> Dict[str, Any]:
-        if not self.config.enabled:
+        if not self.enabled:
             return {"enabled": False, "tasks": []}
         try:
             return {"enabled": True, "tasks": self._request_json("/api/tasks")}
@@ -261,6 +355,7 @@ class ClusterClient:
                 "allowed_prefixes": self.config.allowed_prefixes,
                 "default_tags": self.config.default_tags,
                 "remote_allowed": self.config.allow_remote,
+                "sovereign_mode": POLICY.enabled,
             },
         }
 
@@ -272,9 +367,10 @@ class ClusterClient:
         timeout_seconds: int = 120,
         priority: int = 5,
     ) -> Dict[str, Any]:
-        self.validate_command(command)
+        self._ensure_enabled()
+        canonical, _, _ = self._validated_command(command)
         payload = {
-            "command": command.strip(),
+            "command": canonical,
             "required_tags": required_tags or self.config.default_tags,
             "timeout_seconds": max(30, min(int(timeout_seconds), 24 * 60 * 60)),
             "priority": max(0, min(int(priority), 100)),

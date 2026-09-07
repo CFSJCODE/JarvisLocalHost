@@ -13,6 +13,8 @@ import subprocess
 from dataclasses import dataclass
 from typing import Dict, Iterable, Optional
 
+from jarvis_localhost.sovereign import POLICY
+
 
 TRUTHY = {"1", "true", "yes", "on", "sim"}
 
@@ -53,18 +55,28 @@ class LocalWakeGate:
 class LocalVoice:
     """Offline TTS adapter; disabled by default unless configured."""
 
-    def __init__(self, enabled: bool = False, rate: int = 165, volume: float = 1.0):
-        self.enabled = enabled
+    def __init__(
+        self,
+        enabled: bool = False,
+        rate: int = 165,
+        volume: float = 1.0,
+        policy_blocked: bool = False,
+    ):
+        self.policy_blocked = bool(policy_blocked)
+        self.enabled = bool(enabled) and not self.policy_blocked
         self.rate = rate
         self.volume = volume
         self.wake_gate = LocalWakeGate(os.getenv("JARVIS_WAKE_WORD", "jarvis"))
 
     @classmethod
     def from_env(cls) -> "LocalVoice":
+        requested = _env_bool("JARVIS_VOICE_ENABLED", False)
+        policy_blocked = POLICY.enabled and not POLICY.allow_system_tts
         return cls(
-            enabled=_env_bool("JARVIS_VOICE_ENABLED", False),
+            enabled=requested,
             rate=int(os.getenv("JARVIS_VOICE_RATE", "165")),
             volume=float(os.getenv("JARVIS_VOICE_VOLUME", "1.0")),
+            policy_blocked=policy_blocked,
         )
 
     def status(self) -> Dict:
@@ -72,7 +84,12 @@ class LocalVoice:
             "enabled": self.enabled,
             "wake_word": self.wake_gate.wake_word,
             "active": self.wake_gate.active,
-            "mode": "offline_tts",
+            "mode": (
+                "disabled_by_sovereign_policy"
+                if self.policy_blocked
+                else "offline_tts"
+            ),
+            "policy_blocked": self.policy_blocked,
         }
 
     def update_wake_state(self, text: str) -> Dict:
@@ -87,6 +104,14 @@ class LocalVoice:
         text = (text or "").strip()
         if not text:
             return {"spoken": False, "reason": "Texto vazio."}
+        if self.policy_blocked:
+            return {
+                "spoken": False,
+                "reason": (
+                    "TTS do sistema bloqueado pela politica soberana. "
+                    "Defina JARVIS_ALLOW_SYSTEM_TTS=1 conscientemente para habilitar."
+                ),
+            }
         if not self.enabled:
             return {
                 "spoken": False,
