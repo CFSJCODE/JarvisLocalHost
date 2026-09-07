@@ -2,7 +2,7 @@
 
 ## Atualização de recursos — 2026-09-07
 
-Consulte primeiro `AJUSTE_RECURSOS_2026-09-07.md`. O pedido atual mantém o runtime
+Consulte primeiro `docs/historico/AJUSTE_RECURSOS_2026-09-07.md`. O pedido atual mantém o runtime
 em E: e atualiza somente o backup oculto em D:. O LM concluído no passo 1890
 foi preservado; uma parada cooperativa gravou o recuperador no lote 8521,
 protegido em `D:\.JarvisLocalHost-Backup\2026-09-07\checkpoint-8521`.
@@ -15,7 +15,7 @@ Os registros abaixo são históricos; não usar seus números como status atual.
 
 ## Atualização de recuperação — 2026-09-06
 
-Consulte `RECUPERACAO_2026-09-06.md` antes de seguir o estado histórico abaixo.
+Consulte `docs/historico/RECUPERACAO_2026-09-06.md` antes de seguir o estado histórico abaixo.
 Codex sincronizou diretamente com a sessão anterior do Claude Code. O corpus
 atual validado tem 269 documentos e 233.223 chunks. O checkpoint íntegro mais
 recente agora é `jarvis_final`: 1.890 passos de LM concluídos às 03:02 de
@@ -57,9 +57,9 @@ auditoria longa deste projeto e está entregando o trabalho para continuar
 em Claude Code. Leia isto primeiro; os documentos abaixo dão o histórico
 completo, em ordem cronológica:
 
-1. `RELATORIO_AUDITORIA_JARVIS_LOCALHOST.md` — relatório da auditoria original (achados F0-F9), entregue 2026-08-31.
-2. `AUDITORIA_ADENDO_2026-09-01.md` — o que aconteceu depois: extensão do F1, um incidente real de queda de treino, e F10 (recurso novo de retomada de checkpoint).
-3. `AGENTS.md` — protocolo de colaboração multiagente já em vigor neste repo (ver "Regras não-negociáveis" abaixo — é importante).
+1. `docs/historico/RELATORIO_AUDITORIA_JARVIS_LOCALHOST.md` — relatório da auditoria original (achados F0-F9), entregue 2026-08-31.
+2. `docs/historico/AUDITORIA_ADENDO_2026-09-01.md` — o que aconteceu depois: extensão do F1, um incidente real de queda de treino, e F10 (recurso novo de retomada de checkpoint).
+3. `docs/AGENTS.md` — protocolo de colaboração multiagente já em vigor neste repo (ver "Regras não-negociáveis" abaixo — é importante).
 
 ## Regras não-negociáveis
 
@@ -67,7 +67,7 @@ completo, em ordem cronológica:
 - **Dados reais do usuário**: este repositório processa a biblioteca pessoal real do usuário. Nunca inventar/assumir conteúdo de documentos; nunca deletar dados do usuário sem autorização explícita; scripts de teste usam corpus sintético isolado, nunca o `data/` de produção diretamente sem necessidade.
 - **Modo soberano é intencional, não um bug**: tokenizer/LM/retriever são treinados do zero no corpus local, sem pesos pré-treinados externos (ver `ARCHITECTURE.md`). PDFs sem camada de texto (scans) são corretamente REJEITADOS por padrão (`SovereignModeViolation`) — isso é o design funcionando, não uma falha a "corrigir" habilitando OCR de terceiros por padrão.
 - **Corpus é closed-world com hash de linhagem**: qualquer mudança no conjunto de documentos muda `corpus_sha256`/`canonical_corpus_sha256`, o que invalida qualquer checkpoint de treino anterior (é assim que o F10 decide se pode retomar ou tem que treinar do zero — ver o adendo).
-- **Outros agentes podem estar trabalhando neste mesmo repo** (ver `AGENTS.md`: protocolo Antigravity+Codex via barramento MCP `jarvis-team-bus`). Releia o estado em disco antes de editar; um agente por arquivo por vez; nunca declarar conclusão só com base em arquivo, sempre com teste real.
+- **Outros agentes podem estar trabalhando neste mesmo repo** (ver `docs/AGENTS.md`: protocolo Antigravity+Codex via barramento MCP `jarvis-team-bus`). Releia o estado em disco antes de editar; um agente por arquivo por vez; nunca declarar conclusão só com base em arquivo, sempre com teste real.
 - **Gotcha de ambiente** (observado usando uma ponte MCP de terminal remoto, pode ou não se aplicar ao Bash nativo do Claude Code): comandos PowerShell inline com `-Command "..."` contendo variáveis `$algo` tiveram o token silenciosamente removido em alguns casos. Se um comando com `$variavel` falhar de forma estranha, escrever um `.ps1` e rodar com `-File` resolve.
 
 ## Estado real confirmado agora (2026-09-01, ~14:30 UTC)
