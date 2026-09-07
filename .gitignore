@@ -66,3 +66,11 @@ jarvis_localhost/uploads/**
 
 # Keep documentation PDFs versionable if needed later
 !jarvis_localhost/docs/**/*.pdf
+
+# Runtime operational files (logs, locks, ingestion records)
+*.jsonl
+jarvis_localhost/tools/.watchdog.lock
+
+# Agent/tool workspace metadata (not source)
+.work-folder-info
+.vfsmeta/

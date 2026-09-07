@@ -229,6 +229,30 @@ body::after {
   padding:2px 7px; border:1px solid rgba(34,211,238,.25);
   color:rgba(34,211,238,.55); background:rgba(34,211,238,.04);
 }
+.rich-p { margin:0 0 6px 0; }
+.rich-p:last-child { margin-bottom:0; }
+.rich-list { margin:4px 0 8px 0; padding-left:18px; list-style-type:disc; }
+.rich-li { margin-bottom:6px; line-height:1.55; }
+.rich-bold { color:var(--cyan); font-weight:600; text-shadow:0 0 4px rgba(34,211,238,.3); }
+.evidence-tag {
+  display:inline-block; font-family:'Orbitron',sans-serif; font-size:7.5px;
+  letter-spacing:1px; color:#22d3ee; background:rgba(34,211,238,.12);
+  border:1px solid rgba(34,211,238,.35); padding:1px 4px; border-radius:2px;
+  margin-left:4px; vertical-align:middle;
+}
+
+.feedback-bar {
+  margin-top:6px; display:flex; gap:6px; align-items:center; opacity:.75;
+}
+.feedback-bar:hover { opacity:1; }
+.fb-btn {
+  background:rgba(34,211,238,.06); border:1px solid rgba(34,211,238,.2);
+  color:rgba(34,211,238,.8); font-size:10px; padding:2px 6px;
+  cursor:pointer; border-radius:2px; transition:all .2s;
+}
+.fb-btn:hover { background:rgba(34,211,238,.2); border-color:var(--cyan); color:#fff; }
+.fb-btn.active-pos { background:rgba(34,197,94,.25); border-color:#22c55e; color:#4ade80; }
+.fb-btn.active-neg { background:rgba(239,68,68,.25); border-color:#ef4444; color:#f87171; }
 
 /* Input */
 .input-zone {
@@ -748,7 +772,7 @@ window.Chart = Chart;
     <!-- TRAIN TAB -->
     <div class="tab-content" id="tc-train">
       <div style="font-size:11px;color:rgba(34,211,238,.6);margin-bottom:10px;line-height:1.6">
-        O modelo Transformer será treinado do zero com os documentos carregados.
+        O treinamento usa os documentos autorizados e retoma um ponto salvo compatível, quando disponível.
         Rede neural com atenção multi-cabeça, BPE tokenizer e geração autoregressiva.
       </div>
       <div class="prog-wrap" id="train-prog-wrap" style="display:none">
@@ -848,15 +872,15 @@ window.Chart = Chart;
   </div>
 
 
-  <!-- Energy -->
+  <!-- Decorative core visualization; not a hardware measurement. -->
   <div class="panel">
     <div class="plabel">▸ Reator Arc</div>
     <div class="energy-val">
-      <div class="ev" id="energy-val">--%</div>
-      <div class="et">REATOR ARC — ESTÁVEL</div>
+      <div class="ev" aria-hidden="true">◈</div>
+      <div class="et">VISUALIZAÇÃO DO NÚCLEO</div>
     </div>
-    <div class="m-bar" style="margin-top:8px">
-      <div class="m-fill" id="energy-bar" style="width:0%;background:linear-gradient(90deg,#1b4b6b,#22d3ee)"></div>
+    <div class="m-bar" style="margin-top:8px" aria-hidden="true">
+      <div class="m-fill" style="width:100%;background:linear-gradient(90deg,#1b4b6b,#22d3ee)"></div>
     </div>
   </div>
 
@@ -874,13 +898,61 @@ window.Chart = Chart;
 
 <script>
 // ─── Config ───────────────────────────────────────────────────────────────────
-const API = '';   // same origin — change to 'http://localhost:8000' if needed
-const WS_URL = `ws://${location.host}/ws`;
+const API = '';
+const WS_SCHEME = location.protocol === 'https:' ? 'wss' : 'ws';
+const WS_URL = `${WS_SCHEME}://${location.host}/ws`;
+let csrfToken = '';
+let sessionPromise = null;
+
+async function ensureLocalSession(forceRefresh=false) {
+  if (forceRefresh) {
+    csrfToken = '';
+    sessionPromise = null;
+  }
+  if (!sessionPromise) {
+    sessionPromise = fetch(API + '/api/session', {
+      method: 'GET',
+      credentials: 'same-origin',
+      cache: 'no-store',
+    }).then(async response => {
+      if (!response.ok) throw new Error('Sessão local indisponível');
+      const data = await response.json();
+      if (!data || typeof data.csrf_token !== 'string' || !data.csrf_token) {
+        throw new Error('Resposta de sessão inválida');
+      }
+      csrfToken = data.csrf_token;
+      return csrfToken;
+    }).catch(error => {
+      sessionPromise = null;
+      throw error;
+    });
+  }
+  return sessionPromise;
+}
+
+async function secureFetch(url, options={}, canRetry=true) {
+  const method = String(options.method || 'GET').toUpperCase();
+  const mutating = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method);
+  const requestOptions = { ...options, credentials: 'same-origin' };
+  if (mutating) {
+    const token = await ensureLocalSession();
+    const headers = new Headers(options.headers || {});
+    headers.set('X-Jarvis-CSRF', token);
+    requestOptions.headers = headers;
+  }
+  const response = await fetch(url, requestOptions);
+  if (mutating && canRetry && response.status === 403) {
+    await ensureLocalSession(true);
+    return secureFetch(url, options, false);
+  }
+  return response;
+}
 
 // ─── State ────────────────────────────────────────────────────────────────────
 let msgCount = 0, eventCount = 0;
 let ws = null;
 let documents = [];
+let lastUserMessage = '';
 
 // ─── Clock ────────────────────────────────────────────────────────────────────
 function tick() {
@@ -894,15 +966,21 @@ function connectWS() {
   try {
     ws = new WebSocket(WS_URL);
     ws.onopen    = () => { setConnStatus(true); addLog('WebSocket conectado'); };
-    ws.onclose   = () => { setConnStatus(false); setTimeout(connectWS, 3000); };
-    ws.onerror   = () => setConnStatus(false);
+    ws.onclose   = () => {
+      setConnStatus(false);
+      addLog('WebSocket desconectado; reconexão agendada');
+      setTimeout(async () => {
+        try { await ensureLocalSession(true); } catch (error) {}
+        connectWS();
+      }, 3000);
+    };
+    ws.onerror   = () => { setConnStatus(false); addLog('Falha de conexão WebSocket'); };
     ws.onmessage = (e) => handleWS(JSON.parse(e.data));
   } catch (ex) {
     setConnStatus(false);
     setTimeout(connectWS, 3000);
   }
 }
-connectWS();
 
 function handleWS(msg) {
   if (msg.type === 'metrics')       updateMetrics(msg.data);
@@ -922,6 +1000,26 @@ function handleInit(data) {
   if (data.is_trained)  setModelStatus('trained');
   if (data.is_training) setModelStatus('training');
   if (data.projects)    data.projects.forEach(addProjectTag);
+  loadTrainStatus();
+}
+
+async function loadTrainStatus() {
+  try {
+    const res = await fetch(API + '/api/train/status');
+    const data = await res.json();
+    if (data.is_training) {
+      const wrap = document.getElementById('train-prog-wrap');
+      if (wrap) wrap.style.display = 'block';
+      const btn = document.getElementById('train-btn');
+      if (btn) { btn.disabled = true; btn.textContent = '⏳ TREINANDO...'; }
+      setModelStatus('training');
+      if (data.progress) updateTrainProgress(data.progress);
+    } else if (data.is_trained) {
+      setModelStatus('trained');
+      const btn = document.getElementById('train-btn');
+      if (btn) { btn.disabled = false; btn.textContent = '✓ MODELO TREINADO'; }
+    }
+  } catch(e) {}
 }
 
 // ─── Metrics Update ───────────────────────────────────────────────────────────
@@ -939,10 +1037,6 @@ function updateMetrics(data) {
   document.getElementById('net-val').textContent  = (net.bytes_sent_mb || 0) + ' MB';
   document.getElementById('temp-val').textContent = cpu.temperature ? cpu.temperature + '°C' : 'N/A';
 
-  const energy = 90 + Math.round(Math.random() * 8);
-  document.getElementById('energy-val').textContent = energy + '%';
-  document.getElementById('energy-bar').style.width  = energy + '%';
-
   document.getElementById('sys-platform').textContent = 'PLATAFORMA: ' + (data.platform || '--');
 }
 
@@ -958,7 +1052,9 @@ function setBar(valId, barId, pct) {
 function setConnStatus(online) {
   const el = document.getElementById('conn-status');
   el.className = 'status-pill ' + (online ? 'online' : 'offline');
-  el.innerHTML = `<span class="blink"></span>${online ? 'CONECTADO' : 'DESCONECTADO'}`;
+  const blink = document.createElement('span');
+  blink.className = 'blink';
+  el.replaceChildren(blink, document.createTextNode(online ? 'CONECTADO' : 'DESCONECTADO'));
 }
 
 function setModelStatus(state) {
@@ -970,7 +1066,9 @@ function setModelStatus(state) {
   };
   const [cls, txt] = map[state] || map['waiting'];
   el.className = 'status-pill ' + cls;
-  el.innerHTML = `<span class="blink"></span>${txt}`;
+  const blink = document.createElement('span');
+  blink.className = 'blink';
+  el.replaceChildren(blink, document.createTextNode(txt));
 }
 
 // ─── Chat ─────────────────────────────────────────────────────────────────────
@@ -979,6 +1077,7 @@ async function sendMsg() {
   const text  = field.value.trim();
   if (!text) return;
   field.value = '';
+  lastUserMessage = text;
 
   addMessage(text, 'user');
 
@@ -987,7 +1086,7 @@ async function sendMsg() {
   scrollChat();
 
   try {
-    const res  = await fetch(API + '/api/chat', {
+    const res  = await secureFetch(API + '/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ message: text }),
@@ -1013,6 +1112,77 @@ async function sendMsg() {
   }
 }
 
+async function sendFeedback(question, answer, accepted, rating, regenerated, sources) {
+  try {
+    const res = await secureFetch(API + '/api/chat/feedback', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        question: question || 'Pergunta do usuário',
+        answer: answer,
+        accepted: Boolean(accepted),
+        explicit_rating: rating,
+        regenerated: Boolean(regenerated),
+        sources: sources || [],
+      }),
+    });
+    if (res.ok) {
+      showToast(accepted ? '✦ PREFERÊNCIA REGISTRADA (DPO)' : '⚠ FEEDBACK NEGATIVO REGISTRADO');
+    }
+  } catch (e) {
+    showToast('⚠ Erro ao registrar feedback');
+  }
+}
+
+function formatRichText(container, text) {
+  const paragraphs = text.split(/\n\n+/);
+  paragraphs.forEach(pText => {
+    if (!pText.trim()) return;
+    const lines = pText.split(/\n+/);
+    const isList = lines.every(line => line.trim().startsWith('•') || line.trim().startsWith('-'));
+    if (isList) {
+      const ul = document.createElement('ul');
+      ul.className = 'rich-list';
+      lines.forEach(line => {
+        const clean = line.trim().replace(/^[•\-]\s*/, '');
+        const li = document.createElement('li');
+        li.className = 'rich-li';
+        appendFormattedLine(li, clean);
+        ul.appendChild(li);
+      });
+      container.appendChild(ul);
+    } else {
+      const p = document.createElement('p');
+      p.className = 'rich-p';
+      lines.forEach((line, lIdx) => {
+        if (lIdx > 0) p.appendChild(document.createElement('br'));
+        appendFormattedLine(p, line);
+      });
+      container.appendChild(p);
+    }
+  });
+}
+
+function appendFormattedLine(parent, line) {
+  const tokens = line.split(/(\*\*[^*]+\*\*|\[E\d+\])/g);
+  tokens.forEach(tok => {
+    if (!tok) return;
+    if (tok.startsWith('**') && tok.endsWith('**') && tok.length >= 4) {
+      const strong = document.createElement('strong');
+      strong.className = 'rich-bold';
+      strong.textContent = tok.slice(2, -2);
+      parent.appendChild(strong);
+    } else if (/^\[E\d+\]$/.test(tok)) {
+      const span = document.createElement('span');
+      span.className = 'evidence-tag';
+      span.textContent = tok;
+      parent.appendChild(span);
+    } else {
+      parent.appendChild(document.createTextNode(tok));
+    }
+  });
+}
+
 function addMessage(text, role, sources) {
   text = String(text ?? 'Resposta local sem conteúdo.');
   const box = document.getElementById('messages');
@@ -1023,19 +1193,60 @@ function addMessage(text, role, sources) {
   const aClass  = role === 'jarvis' ? 'j' : 'u';
   const bname   = role === 'jarvis' ? 'J.A.R.V.I.S' : 'SR. STARK';
 
-  let sourcesHtml = '';
-  if (sources && sources.length > 0) {
-    sourcesHtml = `<div class="sources">${sources.map(s =>
-      `<span class="src-badge">📄 ${s.source} (${(s.score*100).toFixed(0)}%)</span>`
-    ).join('')}</div>`;
+  const avatarElement = document.createElement('div');
+  avatarElement.className = `avatar ${aClass}`;
+  avatarElement.textContent = avatar;
+
+  const content = document.createElement('div');
+  const nameElement = document.createElement('div');
+  nameElement.className = 'bname';
+  nameElement.textContent = bname;
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  formatRichText(bubble, text);
+  content.append(nameElement, bubble);
+
+  if (Array.isArray(sources) && sources.length > 0) {
+    const sourcesElement = document.createElement('div');
+    sourcesElement.className = 'sources';
+    sources.forEach(source => {
+      const badge = document.createElement('span');
+      badge.className = 'src-badge';
+      const score = Number(source && source.score);
+      const percentage = Number.isFinite(score) ? Math.round(score * 100) : 0;
+      badge.textContent = `📄 ${String(source?.source ?? 'Documento')} (${percentage}%)`;
+      sourcesElement.appendChild(badge);
+    });
+    bubble.appendChild(sourcesElement);
   }
 
-  div.innerHTML = `
-    <div class="avatar ${aClass}">${avatar}</div>
-    <div>
-      <div class="bname">${bname}</div>
-      <div class="bubble">${text}${sourcesHtml}</div>
-    </div>`;
+  if (role === 'jarvis') {
+    const fbBar = document.createElement('div');
+    fbBar.className = 'feedback-bar';
+
+    const btnUp = document.createElement('button');
+    btnUp.className = 'fb-btn';
+    btnUp.textContent = '👍 Útil';
+    btnUp.onclick = async () => {
+      btnUp.classList.add('active-pos');
+      btnDown.classList.remove('active-neg');
+      await sendFeedback(lastUserMessage, text, true, 5, false, sources);
+    };
+
+    const btnDown = document.createElement('button');
+    btnDown.className = 'fb-btn';
+    btnDown.textContent = '👎 Ajustar';
+    btnDown.onclick = async () => {
+      btnDown.classList.add('active-neg');
+      btnUp.classList.remove('active-pos');
+      await sendFeedback(lastUserMessage, text, false, 1, false, sources);
+    };
+
+    fbBar.append(btnUp, btnDown);
+    bubble.appendChild(fbBar);
+  }
+
+  div.append(avatarElement, content);
 
   box.appendChild(div);
   scrollChat();
@@ -1082,13 +1293,14 @@ async function uploadPDF(file) {
   fill.style.width = '40%'; pct.textContent = '40%';
 
   try {
-    const res  = await fetch(API + '/api/pdf/upload', { method:'POST', body:fd });
+    const res  = await secureFetch(API + '/api/pdf/upload', { method:'POST', body:fd });
     const data = await res.json();
+    if (!res.ok) throw new Error('Upload rejeitado');
     fill.style.width = '100%'; pct.textContent = '100%';
 
     if (data.success) {
       addMessage(
-        `Documento <strong>${file.name}</strong> processado com sucesso, Senhor. ` +
+        `Documento ${file.name} processado com sucesso, Senhor. ` +
         `${data.pages} páginas, ${data.words?.toLocaleString()} palavras, ` +
         `${data.tables} tabelas, ${data.images} imagens extraídas.`,
         'jarvis'
@@ -1113,15 +1325,29 @@ async function loadDocuments() {
 
 function renderDocList() {
   const el = document.getElementById('doc-list');
+  el.replaceChildren();
   if (documents.length === 0) {
-    el.innerHTML = '<div style="font-size:10px;color:rgba(34,211,238,.3);text-align:center;padding:8px">Nenhum documento ainda</div>';
+    const empty = document.createElement('div');
+    empty.style.cssText = 'font-size:10px;color:rgba(34,211,238,.3);text-align:center;padding:8px';
+    empty.textContent = 'Nenhum documento ainda';
+    el.appendChild(empty);
     return;
   }
-  el.innerHTML = documents.map(d => `
-    <div class="doc-item">
-      <span class="doc-name" title="${d.filename}">${d.filename}</span>
-      <span class="doc-stats">${d.pages}p · ${(d.words||0).toLocaleString()}w</span>
-    </div>`).join('');
+  documents.forEach(documentInfo => {
+    const item = document.createElement('div');
+    item.className = 'doc-item';
+    const name = document.createElement('span');
+    name.className = 'doc-name';
+    name.textContent = String(documentInfo?.filename ?? 'Documento');
+    name.title = name.textContent;
+    const stats = document.createElement('span');
+    stats.className = 'doc-stats';
+    const pages = Number(documentInfo?.pages);
+    const words = Number(documentInfo?.words);
+    stats.textContent = `${Number.isFinite(pages) ? pages : 0}p · ${Number.isFinite(words) ? words.toLocaleString() : '0'}w`;
+    item.append(name, stats);
+    el.appendChild(item);
+  });
 }
 
 function checkTrainReady() {
@@ -1143,12 +1369,15 @@ async function startTraining() {
   btn.disabled = true; btn.textContent = '⏳ TREINANDO...';
   document.getElementById('train-prog-wrap').style.display = 'block';
   setModelStatus('training');
-  addMessage('Iniciando treinamento do modelo neural Transformer do zero, Senhor. Aguarde...', 'jarvis');
-  addLog('Treinamento neural iniciado');
+  addMessage('Solicitando início ou retomada do treinamento neural, Senhor. Aguarde...', 'jarvis');
+  addLog('Solicitando início do treinamento');
 
   try {
-    await fetch(API + '/api/train/start', { method:'POST' });
+    const response = await secureFetch(API + '/api/train/start', { method:'POST' });
+    if (!response.ok) throw new Error('Treinamento rejeitado');
+    addLog('Solicitação de treinamento aceita pelo servidor');
   } catch(e) {
+    addLog('Falha na solicitação de início do treinamento');
     showToast('⚠ Erro ao iniciar treinamento'); btn.disabled=false;
   }
 }
@@ -1159,18 +1388,24 @@ function updateTrainProgress(data) {
   const pct  = document.getElementById('train-pct');
   const info = document.getElementById('train-info');
   const btn  = document.getElementById('train-btn');
+  const wrap = document.getElementById('train-prog-wrap');
+
+  if (wrap) wrap.style.display = 'block';
 
   if (data.error) {
-    log.innerHTML += `<div style="color:var(--red)">ERRO: ${data.error}</div>`;
-    btn.disabled = false; btn.textContent = '⬡ INICIAR TREINAMENTO NEURAL';
+    addLog(`Treinamento interrompido: ${String(data.error)}`);
+    appendTrainLog(`ERRO: ${String(data.error)}`, 'var(--red)');
+    if (btn) { btn.disabled = false; btn.textContent = '⬡ INICIAR TREINAMENTO NEURAL'; }
     setModelStatus('waiting');
     return;
   }
 
   if (data.done) {
-    fill.style.width = '100%'; pct.textContent = '100%';
-    info.textContent = 'TREINAMENTO CONCLUÍDO';
-    btn.disabled = false; btn.textContent = '✓ MODELO TREINADO';
+    addLog('Servidor confirmou a conclusão do treinamento');
+    if (fill) fill.style.width = '100%';
+    if (pct) pct.textContent = '100%';
+    if (info) info.textContent = 'TREINAMENTO CONCLUÍDO';
+    if (btn) { btn.disabled = false; btn.textContent = '✓ MODELO TREINADO'; }
     setModelStatus('trained');
     showToast('✦ MODELO NEURAL TREINADO COM SUCESSO');
     addMessage('Treinamento concluído, Senhor. O modelo neural está ativo e pronto para responder com base nos documentos carregados.', 'jarvis');
@@ -1178,17 +1413,41 @@ function updateTrainProgress(data) {
     return;
   }
 
-  if (data.step !== undefined) {
-    const p = data.progress || 0;
-    fill.style.width = p + '%'; pct.textContent = p + '%';
-    info.textContent = `Step: ${data.step} | Loss: ${data.loss || '--'} | LR: ${data.lr || '--'}`;
-    log.innerHTML += `<div>step ${data.step} | loss ${data.loss}</div>`;
-    log.scrollTop = log.scrollHeight;
+  if (data.percent !== undefined) {
+    const p = Math.min(100, Math.max(0, Math.round(Number(data.percent) || 0)));
+    if (fill) fill.style.width = p + '%';
+    if (pct) pct.textContent = p + '%';
+  }
+
+  if (data.message && info) {
+    info.textContent = String(data.message);
+    appendTrainLog(String(data.message), 'var(--cyan)');
+  }
+
+  if (data.loss !== undefined && data.step !== undefined) {
+    const p = data.progress !== undefined ? data.progress : data.percent;
+    if (p !== undefined) {
+      const rounded = Math.min(100, Math.max(0, Math.round(Number(p) || 0)));
+      if (fill) fill.style.width = rounded + '%';
+      if (pct) pct.textContent = rounded + '%';
+    }
+    if (info) info.textContent = `Step: ${data.step} | Loss: ${data.loss} | LR: ${data.lr || '--'}`;
+    appendTrainLog(`step ${String(data.step)} | loss ${String(data.loss)}`);
+    if (log) log.scrollTop = log.scrollHeight;
   }
   if (data.val_loss !== undefined) {
-    log.innerHTML += `<div style="color:var(--gold)">▸ val_loss: ${data.val_loss}</div>`;
-    log.scrollTop = log.scrollHeight;
+    appendTrainLog(`▸ val_loss: ${String(data.val_loss)}`, 'var(--gold)');
+    if (log) log.scrollTop = log.scrollHeight;
   }
+}
+
+function appendTrainLog(message, color='') {
+  const log = document.getElementById('train-log');
+  const line = document.createElement('div');
+  if (color) line.style.color = color;
+  line.textContent = String(message);
+  log.appendChild(line);
+  log.scrollTop = log.scrollHeight;
 }
 
 // ─── Projects ─────────────────────────────────────────────────────────────────
@@ -1201,16 +1460,17 @@ async function saveProject() {
   if (!name || !type) { showToast('⚠ Preencha Nome e Tipo'); return; }
 
   try {
-    const res = await fetch(API + '/api/project/save', {
+    const res = await secureFetch(API + '/api/project/save', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name, type, priority: prio, description: desc, tags: [] }),
     });
     const data = await res.json();
+    if (!res.ok) throw new Error('Projeto rejeitado');
     if (data.success) {
       addProjectTag(data.project);
       addMessage(
-        `Projeto <strong>${name}</strong> registrado nos arquivos da Stark Industries, Senhor. ` +
+        `Projeto ${name} registrado nos arquivos da Stark Industries, Senhor. ` +
         `Prioridade ${prio}. Recursos alocados.`,
         'jarvis'
       );
@@ -1228,7 +1488,15 @@ function addProjectTag(proj) {
   panel.style.display = 'block';
   const div = document.createElement('div');
   div.className = 'proj-tag';
-  div.innerHTML = `<span class="pname">${proj.name}</span><span class="pprio ${proj.priority}">${proj.priority}</span>`;
+  const name = document.createElement('span');
+  name.className = 'pname';
+  name.textContent = String(proj?.name ?? 'Projeto');
+  const priority = document.createElement('span');
+  const priorityText = String(proj?.priority ?? 'BETA').toUpperCase();
+  const priorityClass = ['ALFA', 'BETA', 'OMEGA'].includes(priorityText) ? priorityText : 'BETA';
+  priority.className = `pprio ${priorityClass}`;
+  priority.textContent = priorityText;
+  div.append(name, priority);
   list.appendChild(div);
 }
 
@@ -1243,20 +1511,21 @@ function switchTab(id) {
 }
 
 // ─── Syslog ───────────────────────────────────────────────────────────────────
-const autoLogs = ['Varredura OK','Firewall atualizado','Criptografia ativa','Backup realizado','Satélite sync'];
 function addLog(msg) {
   const el  = document.getElementById('sys-log');
   const now = new Date().toLocaleTimeString('pt-BR',{hour12:false,hour:'2-digit',minute:'2-digit'});
   const row = document.createElement('div');
   row.className = 'log-entry';
-  row.innerHTML = `<span class="log-t">${now}</span>${msg}`;
+  const timestamp = document.createElement('span');
+  timestamp.className = 'log-t';
+  timestamp.textContent = now;
+  row.append(timestamp, document.createTextNode(String(msg ?? '')));
   el.appendChild(row);
   while (el.children.length > 8) el.removeChild(el.firstChild);
   el.scrollTop = el.scrollHeight;
   eventCount++;
   document.getElementById('session-info').textContent = `SESSÃO ATIVA — ${eventCount} EVENTOS`;
 }
-setInterval(() => addLog(autoLogs[Math.floor(Math.random()*autoLogs.length)]), 7000);
 
 // ─── Toast ────────────────────────────────────────────────────────────────────
 function showToast(msg, gold=false) {
@@ -1299,7 +1568,7 @@ function updateCuriosityStats(s) {
 
 function renderTopicsCloud(topics) {
   const el = document.getElementById('cur-topics-cloud');
-  el.innerHTML = '';
+  el.replaceChildren();
   const sorted = Object.entries(topics).sort((a,b) => b[1]-a[1]);
   sorted.forEach(([topic, count]) => {
     const badge = document.createElement('span');
@@ -1319,16 +1588,20 @@ function renderTopicsCloud(topics) {
 
 function renderInsightsList(insights) {
   const el = document.getElementById('cur-insights-list');
-  el.innerHTML = '';
+  el.replaceChildren();
   if (!insights.length) {
-    el.innerHTML = '<div style="font-size:10px;color:rgba(219,234,254,.7);text-align:center;padding:12px">Analisando documentos… aguarde o primeiro ciclo.</div>';
+    const empty = document.createElement('div');
+    empty.style.cssText = 'font-size:10px;color:rgba(219,234,254,.7);text-align:center;padding:12px';
+    empty.textContent = 'Analisando documentos… aguarde o primeiro ciclo.';
+    el.appendChild(empty);
     return;
   }
   insights.slice(0, 25).forEach(ins => {
     const div = document.createElement('div');
-    const score = Math.round(ins.curiosity_score * 100);
+    const scoreValue = Number(ins?.curiosity_score);
+    const score = Number.isFinite(scoreValue) ? Math.max(0, Math.min(100, Math.round(scoreValue * 100))) : 0;
     const scoreColor = score > 70 ? '#f18821' : score > 40 ? '#22d3ee' : 'rgba(219,234,254,.72)';
-    const sourceLabel = formatInsightSource(ins.source);
+    const sourceLabel = formatInsightSource(ins?.source);
     div.style.cssText = `
       padding:8px 10px; border:1px solid rgba(34,211,238,.22);
       background:rgba(15,45,64,.72); cursor:pointer; transition:all .2s;
@@ -1337,23 +1610,48 @@ function renderInsightsList(insights) {
     div.onmouseenter = function(){ this.style.background='rgba(34,211,238,.10)'; };
     div.onmouseleave = function(){ this.style.background='rgba(15,45,64,.72)'; };
 
-    const tagsHtml = (ins.tags||[]).slice(0,3).map(t =>
-      `<span style="font-family:Orbitron,sans-serif;font-size:6.5px;padding:1px 5px;border:1px solid rgba(241,136,33,.35);color:rgba(241,136,33,.85);margin-right:3px">${t}</span>`
-    ).join('');
+    const header = document.createElement('div');
+    header.style.cssText = 'display:flex;justify-content:space-between;align-items:center;margin-bottom:4px';
+    const source = document.createElement('span');
+    source.style.cssText = 'font-family:Orbitron,sans-serif;font-size:8px;color:rgba(34,211,238,.62);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;padding-right:6px';
+    source.title = String(ins?.source ?? '');
+    source.textContent = `📄 ${sourceLabel}`;
+    const scoreElement = document.createElement('span');
+    scoreElement.style.cssText = `font-family:Orbitron,sans-serif;font-size:9px;font-weight:700;color:${scoreColor};text-shadow:0 0 6px ${scoreColor}`;
+    scoreElement.textContent = `${score}%`;
+    header.append(source, scoreElement);
 
-    div.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">
-        <span title="${escapeHtml(ins.source || '')}" style="font-family:Orbitron,sans-serif;font-size:8px;color:rgba(34,211,238,.62);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;padding-right:6px">📄 ${escapeHtml(sourceLabel)}</span>
-        <span style="font-family:Orbitron,sans-serif;font-size:9px;font-weight:700;color:${scoreColor};text-shadow:0 0 6px ${scoreColor}">${score}%</span>
-      </div>
-      <div style="font-size:11px;color:rgba(248,250,252,.9);line-height:1.5;margin-bottom:5px">${ins.summary}</div>
-      <div style="display:flex;gap:2px;flex-wrap:wrap;margin-bottom:4px">${tagsHtml}</div>
-      <div style="display:flex;gap:10px;font-family:Orbitron,sans-serif;font-size:7px;color:rgba(34,211,238,.3)">
-        <span>↯ S:${Math.round(ins.surprise_score*100)}%</span>
-        <span>∿ H:${Math.round(ins.entropy_score*100)}%</span>
-        <span>◈ N:${Math.round(ins.novelty_score*100)}%</span>
-        <span>🔗 ${ins.connections.length}</span>
-      </div>`;
+    const summary = document.createElement('div');
+    summary.style.cssText = 'font-size:11px;color:rgba(248,250,252,.9);line-height:1.5;margin-bottom:5px';
+    summary.textContent = String(ins?.summary ?? '');
+
+    const tags = document.createElement('div');
+    tags.style.cssText = 'display:flex;gap:2px;flex-wrap:wrap;margin-bottom:4px';
+    (Array.isArray(ins?.tags) ? ins.tags : []).slice(0, 3).forEach(tag => {
+      const tagElement = document.createElement('span');
+      tagElement.style.cssText = 'font-family:Orbitron,sans-serif;font-size:6.5px;padding:1px 5px;border:1px solid rgba(241,136,33,.35);color:rgba(241,136,33,.85);margin-right:3px';
+      tagElement.textContent = String(tag);
+      tags.appendChild(tagElement);
+    });
+
+    const details = document.createElement('div');
+    details.style.cssText = 'display:flex;gap:10px;font-family:Orbitron,sans-serif;font-size:7px;color:rgba(34,211,238,.3)';
+    const percent = value => {
+      const number = Number(value);
+      return Number.isFinite(number) ? Math.max(0, Math.min(100, Math.round(number * 100))) : 0;
+    };
+    [
+      `↯ S:${percent(ins?.surprise_score)}%`,
+      `∿ H:${percent(ins?.entropy_score)}%`,
+      `◈ N:${percent(ins?.novelty_score)}%`,
+      `🔗 ${Array.isArray(ins?.connections) ? ins.connections.length : 0}`,
+    ].forEach(value => {
+      const detail = document.createElement('span');
+      detail.textContent = value;
+      details.appendChild(detail);
+    });
+
+    div.append(header, summary, tags, details);
 
     div.onclick = () => sendInsightToChat(ins);
     el.appendChild(div);
@@ -1368,14 +1666,9 @@ function formatInsightSource(source) {
   return clean.length > 46 ? clean.slice(0, 43) + '...' : clean;
 }
 
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, ch => ({
-    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
-  }[ch]));
-}
-
 function sendInsightToChat(ins) {
-  const msg = `JARVIS, me fale mais sobre este insight do documento "${ins.source}": ${ins.summary.replace(/\[.*?\]\s*/,'')}`;
+  const summary = String(ins?.summary ?? '').replace(/\[.*?\]\s*/, '');
+  const msg = `JARVIS, me fale mais sobre este insight do documento "${String(ins?.source ?? 'Documento')}": ${summary}`;
   document.getElementById('ifield').value = msg;
   sendMsg();
 }
@@ -1416,9 +1709,10 @@ async function surfaceRandomInsight() {
 function handleNewInsight(ins) {
   // Push new insight to JARVIS chat proactively
   if (ins && ins.curiosity_score > 0.6) {
+    const tags = Array.isArray(ins.tags) ? ins.tags.slice(0, 4).join(' · ') : '';
     addMessage(
-      `⬡ <em>Curiosidade detectada</em> em <strong>${ins.source}</strong>:<br>${ins.summary}` +
-      (ins.tags.length ? `<br><small style="opacity:.6">${ins.tags.slice(0,4).join(' · ')}</small>` : ''),
+      `⬡ Curiosidade detectada em ${String(ins.source ?? 'Documento')}: ${String(ins.summary ?? '')}` +
+      (tags ? ` — ${tags}` : ''),
       'jarvis'
     );
     addLog(`Novo insight: ${ins.source} (score: ${Math.round(ins.curiosity_score*100)}%)`);
@@ -1602,10 +1896,13 @@ async function loadAnalytics() {
 
     // Training history
     const trainList = document.getElementById('train-hist-list');
-    trainList.innerHTML = '';
+    trainList.replaceChildren();
     const status = trainSt.is_trained ? '✓ TREINADO' : trainSt.is_training ? '⏳ TREINANDO' : '— AGUARDANDO';
     const color  = trainSt.is_trained ? '#f18821' : trainSt.is_training ? '#22d3ee' : 'rgba(219,234,254,.58)';
-    trainList.innerHTML = `<div style="font-size:11px;color:${color};font-family:Orbitron,sans-serif;font-size:9px;letter-spacing:2px;padding:6px;border:1px solid ${color}33;background:${color}08">${status} | DOCS: ${trainSt.documents} | CHUNKS: ${trainSt.chunks}</div>`;
+    const trainingStatus = document.createElement('div');
+    trainingStatus.style.cssText = `font-size:9px;color:${color};font-family:Orbitron,sans-serif;letter-spacing:2px;padding:6px;border:1px solid ${color}33;background:${color}08`;
+    trainingStatus.textContent = `${status} | DOCS: ${String(trainSt.documents ?? 0)} | CHUNKS: ${String(trainSt.chunks ?? 0)}`;
+    trainList.appendChild(trainingStatus);
 
   } catch(e) { console.warn('[Analytics]', e); }
 }
@@ -1613,13 +1910,26 @@ async function loadAnalytics() {
 // ─── Project Download ──────────────────────────────────────────────────────────
 async function downloadProject(pid) {
   showToast('⬡ Gerando arquivos do projeto…');
-  window.open(API + `/api/project/${pid}/download`, '_blank');
+  const target = API + `/api/project/${encodeURIComponent(String(pid))}/download`;
+  window.open(target, '_blank', 'noopener,noreferrer');
 }
 
 // ─── Init ─────────────────────────────────────────────────────────────────────
-loadDocuments();
-addLog('Sistemas JARVIS inicializados');
-addLog('Interface HUD carregada');
+async function initializeHud() {
+  addLog('Interface HUD carregada');
+  try {
+    await ensureLocalSession();
+    addLog('Sessão local estabelecida');
+    connectWS();
+  } catch (error) {
+    setConnStatus(false);
+    addLog('Falha ao iniciar a sessão local');
+    showToast('⚠ Não foi possível iniciar a sessão local segura.');
+  }
+  loadDocuments();
+  loadTrainStatus();
+}
+initializeHud();
 </script>
 </body>
 </html>

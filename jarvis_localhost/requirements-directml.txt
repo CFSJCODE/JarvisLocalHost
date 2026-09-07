@@ -1,0 +1,11 @@
+# Optional native Windows DirectML accelerator stack for Python 3.10.
+# Install requirements.txt first, then install this file in the same environment.
+# The base and accelerator files deliberately agree on torch 2.4.1.
+#
+# torch-directml 0.2.5.dev240914 declares exact compatibility with
+# torch 2.4.1 and torchvision 0.19.1. Keep the three pins together; using the
+# base requirements.txt torch 2.3.0 pin in this environment is unsupported.
+# The application creates models from the authorized local corpus and does not
+# request torchvision pretrained weights or download checkpoints at runtime.
+torchvision==0.19.1
+torch-directml==0.2.5.dev240914

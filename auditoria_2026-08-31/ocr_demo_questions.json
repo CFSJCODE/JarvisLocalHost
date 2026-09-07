@@ -1,0 +1,98 @@
+{
+  "Q1": {
+    "question": "What is the maximum repetitive reverse voltage of the 1N4007 diode?",
+    "answer": "Não encontrei evidência suficiente nos documentos autorizados para responder com segurança.",
+    "method": "abstention",
+    "abstained": true,
+    "confidence": 0.1472,
+    "citations": [
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 12,
+        "quote": "Strapping Pin Default Configuration Bit Value MTMS Floating – MTDI Floating – GPIO8 Floating – GPIO9 Weak pull-up 1 GPIO15 Floating – To change the bit values, the strapping pins should be connected t"
+      },
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 50,
+        "quote": "Recom- mendations (used to be Chapter 9 Physical Dimensions and PCB Land Pattern ) Added Section 11.2 Module Placement for PCB Design • In Section 1.1 Features , added information about certification "
+      },
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 13,
+        "quote": "Parameter Description Min (ms) Setup time is the time reserved for the power rails to stabilize be- t 0 SU fore the CHIP_PU pin is pulled high to activate the chip. Hold time is the time reserved for "
+      }
+    ]
+  },
+  "Q2": {
+    "question": "What is the average forward current of the 1N4007?",
+    "answer": "Não encontrei evidência suficiente nos documentos autorizados para responder com segurança.",
+    "method": "abstention",
+    "abstained": true,
+    "confidence": 0.1213,
+    "citations": [
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 6,
+        "quote": "Contents 6.4.1 Current Consumption in Active Mode 27 6.4.2 Current Consumption in Other Modes 28 6.5 Memory Specifications 28"
+      },
+      {
+        "doc": "2cb74f37f1634b839c4269f46ff71b4a_mq5.pdf",
+        "page": 2,
+        "quote": "HANWEI ELECTRONICS CO.,LTD MQ-5 http://www.hwsensor.com micro AL O ceramic tube, Tin Dioxide (SnO ) sensitive layer, measuring electrode and heater are fixed into a 2 3 2 crust made by plastic and sta"
+      },
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 12,
+        "quote": "Strapping Pin Default Configuration Bit Value MTMS Floating – MTDI Floating – GPIO8 Floating – GPIO9 Weak pull-up 1 GPIO15 Floating – To change the bit values, the strapping pins should be connected t"
+      }
+    ]
+  },
+  "Q3": {
+    "question": "What is the forward voltage drop of the 1N4007?",
+    "answer": "• If the ESP32-C6 is used as a device by a host MCU, the strapping pin voltage levels can also be controlled by the host MCU [E1].\n\n• Visualization of Timing Parameters for the Strapping Pins [E2].\n\n• Description of Timing Parameters for the Strapping Pins [E3].\n\n• The states of latches cannot be changed in Espressif Systems 12 ESP32-C6-WROOM-1 & WROOM-1U Datasheet v1.4 Submit Documentation Feedback [E1].",
+    "method": "extractive",
+    "abstained": false,
+    "confidence": 0.1882,
+    "citations": [
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 12,
+        "quote": "Strapping Pin Default Configuration Bit Value MTMS Floating – MTDI Floating – GPIO8 Floating – GPIO9 Weak pull-up 1 GPIO15 Floating – To change the bit values, the strapping pins should be connected t"
+      },
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 13,
+        "quote": "Parameter Description Min (ms) Setup time is the time reserved for the power rails to stabilize be- t 0 SU fore the CHIP_PU pin is pulled high to activate the chip. Hold time is the time reserved for "
+      },
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 13,
+        "quote": "4 Boot Configurations any other way. It makes the strapping pin values available during the entire chip operation, and the pins are freed up to be used as regular IO pins after reset. For details on C"
+      }
+    ]
+  },
+  "Q4": {
+    "question": "Does the 1N4007 support a peak forward surge current, and if so how much?",
+    "answer": "Não encontrei evidência suficiente nos documentos autorizados para responder com segurança.",
+    "method": "abstention",
+    "abstained": true,
+    "confidence": 0.0574,
+    "citations": [
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 15,
+        "quote": "4.5 Chip Power-up and Reset Once the power is supplied to the chip, its power rails need a short time to stabilize. After that, CHIP_PU – the pin used for power-up and reset – is pulled high to activa"
+      },
+      {
+        "doc": "1bf6c4ef65e14d7d8eca3efb2f590af2_esp32-c6-wroom-1_wroom-1u_datasheet_en.pdf",
+        "page": 50,
+        "quote": "Recom- mendations (used to be Chapter 9 Physical Dimensions and PCB Land Pattern ) Added Section 11.2 Module Placement for PCB Design • In Section 1.1 Features , added information about certification "
+      },
+      {
+        "doc": "081531f393f648da8f063266d4b1ea5e_Datasheet 1N4007.pdf",
+        "page": 1,
+        "quote": "woo | Tooo |v | 1 Average Rectified Forward Current from 0 25°C to 78°C (See Notes 1 and 2) 1 Repetitive Peak Forward Current, 10 Cycles, FRM at (or below! 78°C (See Note 3) 1 Peak Surge Current, One "
+      }
+    ]
+  }
+}
