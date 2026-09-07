@@ -1,21 +1,77 @@
-MIT License
+JarvisLocalHost
+PolyForm Noncommercial License 1.0.0
 
-Copyright (c) 2026 Cláudio Francisco Dos Santos Júnior
+SPDX-License-Identifier: PolyForm-Noncommercial-1.0.0
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+Copyright © 2026 Cláudio Francisco Dos Santos Júnior
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+Required Notice: JarvisLocalHost — Copyright © 2026 Cláudio Francisco Dos Santos Júnior.
+Required Notice: Original author of JarvisLocalHost: Cláudio Francisco Dos Santos Júnior.
+Required Notice: Original project: JarvisLocalHost — https://github.com/CFSJCODE/JarvisLocalHost
+Required Notice: This authorship notice must accompany every redistributed copy of JarvisLocalHost, including copies containing modifications or derivative works, as required by the Notices section of the PolyForm Noncommercial License 1.0.0.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+LICENSE TERMS
+
+The JarvisLocalHost software is made available under the PolyForm Noncommercial
+License 1.0.0.
+
+The controlling license terms are available at:
+
+https://polyformproject.org/licenses/noncommercial/1.0.0
+
+The short SPDX identifier is:
+
+PolyForm-Noncommercial-1.0.0
+
+ATTRIBUTION AND REQUIRED NOTICES
+
+The PolyForm Noncommercial License 1.0.0 requires a person who distributes
+any copy of any part of the software, with or without changes, to provide
+the license terms or the official license URL and to preserve the plain-text
+lines beginning with "Required Notice:" that were provided with the software.
+
+Accordingly, every redistribution of JarvisLocalHost, whether original, modified,
+forked, ported, packaged, compiled, or incorporated into another permitted
+noncommercial work, must preserve the Required Notice lines above.
+
+Those notices identify the original author of JarvisLocalHost as:
+
+Cláudio Francisco Dos Santos Júnior
+
+A person who modifies JarvisLocalHost may identify their own authorship or
+contributions separately, but must not remove, replace, conceal, or
+misrepresent the attribution of the original author in the Required Notice lines.
+
+NONCOMMERCIAL LICENSING
+
+This file does not grant a general commercial license.
+
+Commercial exploitation of JarvisLocalHost that is not a permitted purpose under
+the PolyForm Noncommercial License 1.0.0 requires a separate license or
+authorization from the copyright holder.
+
+TRADEMARKS AND PROJECT IDENTITY
+
+The software license does not by itself grant rights to use the JarvisLocalHost
+name, logo, visual identity, or other project branding in a way that falsely
+suggests that a modified or third-party distribution is an official release,
+is endorsed by the original author, or originates from the original project.
+
+THIRD-PARTY COMPONENTS
+
+Dependencies, libraries, models, fonts, assets, APIs, datasets, and other
+third-party components remain subject to their own licenses and terms.
+Nothing in this file changes third-party licensing obligations.
+
+INTERPRETATION
+
+The PolyForm Noncommercial License 1.0.0 is the controlling software license.
+This file records the project-specific copyright and Required Notice lines and
+points to the controlling license terms.
+
+If any explanatory statement in this file conflicts with the controlling
+PolyForm Noncommercial License 1.0.0, the controlling license terms prevail.
+
+For a practical explanation of permitted and non-permitted scenarios, see:
+
+.github/USAGE_POLICY.md
