@@ -12,9 +12,9 @@ Set-Location $repoRoot
 
 $requiredPaths = @(
     "README.md",
-    "ARCHITECTURE.md",
-    "DEVELOPMENT.md",
-    "AGENTS.md",
+    "docs\ARCHITECTURE.md",
+    "docs\DEVELOPMENT.md",
+    "docs\AGENTS.md",
     "LICENSE",
     ".env.example",
     ".github\workflows\validate.yml",
