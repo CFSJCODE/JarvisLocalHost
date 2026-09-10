@@ -6,17 +6,49 @@
 
 ---
 
-## Stack de Tecnologias
+## Tecnologias
 
-| Camada | Tecnologias |
-|---|---|
-| **Linguagem** | Python 3.10 |
-| **API / Backend** | FastAPI, Uvicorn, WebSocket |
-| **Deep Learning** | PyTorch, DirectML (GPU AMD/Intel no Windows), CUDA (fallback) |
-| **NLP / ML** | Transformer LM custom, BPE tokenizer, InfoNCE contrastive retriever, RAG extrativo |
-| **Dados** | SQLite, SHA-256 corpus integrity, PDF ingestion pipeline |
-| **DevOps / CI** | PowerShell, Conventional Commits, commitlint, pytest |
-| **Outros** | PPO + ICM (curiosity agents), checkpoint/resume, hardware auto-detection |
+### Linguagens
+
+<p>
+  <img src="https://img.shields.io/badge/Python-3776AB?style=flat-square&logo=python&logoColor=white" alt="Python">
+  <img src="https://img.shields.io/badge/PowerShell-5391FE?style=flat-square&logo=powershell&logoColor=white" alt="PowerShell">
+</p>
+
+### IA & Deep Learning
+
+<p>
+  <img src="https://img.shields.io/badge/PyTorch-EE4C2C?style=flat-square&logo=pytorch&logoColor=white" alt="PyTorch">
+  <img src="https://img.shields.io/badge/DirectML-0078D4?style=flat-square&logo=microsoft&logoColor=white" alt="DirectML">
+  <img src="https://img.shields.io/badge/Transformer_LM-custom-6C3483?style=flat-square" alt="Transformer LM">
+  <img src="https://img.shields.io/badge/BPE_Tokenizer-custom-1A5276?style=flat-square" alt="BPE Tokenizer">
+  <img src="https://img.shields.io/badge/InfoNCE_Retriever-contrastive-117A65?style=flat-square" alt="InfoNCE Retriever">
+  <img src="https://img.shields.io/badge/RAG-extrativo-1F618D?style=flat-square" alt="RAG Extrativo">
+</p>
+
+### API & Backend
+
+<p>
+  <img src="https://img.shields.io/badge/FastAPI-009688?style=flat-square&logo=fastapi&logoColor=white" alt="FastAPI">
+  <img src="https://img.shields.io/badge/Uvicorn-499848?style=flat-square&logo=gunicorn&logoColor=white" alt="Uvicorn">
+  <img src="https://img.shields.io/badge/WebSocket-010101?style=flat-square&logo=socketdotio&logoColor=white" alt="WebSocket">
+</p>
+
+### Dados & Qualidade
+
+<p>
+  <img src="https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white" alt="SQLite">
+  <img src="https://img.shields.io/badge/pytest-0A9EDC?style=flat-square&logo=pytest&logoColor=white" alt="pytest">
+  <img src="https://img.shields.io/badge/Conventional_Commits-FE5196?style=flat-square&logo=conventionalcommits&logoColor=white" alt="Conventional Commits">
+</p>
+
+### Plataforma
+
+<p>
+  <img src="https://img.shields.io/badge/Windows-0078D4?style=flat-square&logo=windows&logoColor=white" alt="Windows">
+  <img src="https://img.shields.io/badge/Git-F05032?style=flat-square&logo=git&logoColor=white" alt="Git">
+  <img src="https://img.shields.io/badge/GitHub-181717?style=flat-square&logo=github&logoColor=white" alt="GitHub">
+</p>
 
 ---
 
