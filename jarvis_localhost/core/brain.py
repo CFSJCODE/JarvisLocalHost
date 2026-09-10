@@ -1377,7 +1377,7 @@ class JarvisBrain:
                     progress_interval=10,
                     cancellation_event=self._training_cancel,
                     checkpoint_dir=staging,
-                    checkpoint_interval=200,
+                    checkpoint_interval=300,
                 )
                 emit({"percent": 87, "message": "Avaliando recuperador em lotes limitados."})
                 retrieval_uncertainty_by_chunk = (
